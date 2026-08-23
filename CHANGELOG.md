@@ -1,11 +1,28 @@
 # Changelog
 
-All notable changes to the "Kanban.md" extension will be documented in this file.
+All notable changes to "md-kanban-tracker" will be documented in this file.
+This project is a fork of [kanban.md](https://github.com/wguilherme/kanban.md)
+(MIT) — entries up to and including 0.1.4 are inherited from the upstream
+project; entries from 0.1.0-tracker onward are specific to this fork.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-08-23 (md-kanban-tracker fork)
+
+### Features
+
+- **Board automation**: single active WIP task (a second task dragged into WIP sends the previous one to the top of To Do), daily Done → Done Done archiving on the first task to enter WIP each day, and a timer synced to whatever occupies WIP — starts/stops automatically, never touches a manually-started timer for a task outside WIP. Runs synchronously in the extension backend (`src/automation/`), no external watcher process.
+- **Companion folder**: opening a `.kanban.md` file creates a `md-kanban-tracker/` folder next to it (if missing) with `<board>.timelog.md`, a Spanish usage guide (`kanban-guia-ES.md`), and a short product readme.
+- **Editable task title**: click the title in the task modal to rename it in place. `Enter` saves, `Escape` reverts to the original value without saving (and does not close the modal), blur commits like `Enter`.
+- **Due date picker discoverability**: clicking anywhere in the due-date row opens the native calendar picker via `showPicker()`, not just the small icon.
+- Internal extension namespace (commands, views, configuration section) renamed to `md-kanban-tracker.*` so this fork can be installed alongside the original marketplace extension without id collisions.
+
+### Bug Fixes
+
+- **Empty-column drop**: fixed dropping a card onto a column with zero tasks sometimes snapping it back to the source column — `closestCorners` alone can fail to register an empty column as a valid drop target; now falls back from `pointerWithin`. (Also submitted upstream as [wguilherme/kanban.md#7](https://github.com/wguilherme/kanban.md/pull/7).)
 
 ## [0.1.4] - 2026-01-02
 

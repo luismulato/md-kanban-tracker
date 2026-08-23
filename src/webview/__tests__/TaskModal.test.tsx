@@ -323,4 +323,125 @@ describe('TaskModal', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
   });
+
+  describe('Title editing', () => {
+    it('turns the title into an input when clicked', () => {
+      render(<TaskModal {...defaultProps} />);
+
+      fireEvent.click(screen.getByText('Test Task'));
+
+      expect(screen.getByDisplayValue('Test Task')).toBeInTheDocument();
+    });
+
+    it('commits the new title on Enter and exits edit mode', () => {
+      const onUpdateTask = vi.fn();
+      render(<TaskModal {...defaultProps} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Test Task'));
+      const input = screen.getByDisplayValue('Test Task');
+      fireEvent.change(input, { target: { value: 'Renamed task' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { title: 'Renamed task' });
+      expect(screen.queryByDisplayValue('Renamed task')).not.toBeInTheDocument();
+    });
+
+    it('reverts to the original title on Escape without saving', () => {
+      const onUpdateTask = vi.fn();
+      render(<TaskModal {...defaultProps} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Test Task'));
+      const input = screen.getByDisplayValue('Test Task');
+      fireEvent.change(input, { target: { value: 'Discarded edit' } });
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(onUpdateTask).not.toHaveBeenCalled();
+      expect(screen.getByText('Test Task')).toBeInTheDocument();
+      expect(screen.queryByDisplayValue('Discarded edit')).not.toBeInTheDocument();
+    });
+
+    it('does NOT close the whole modal when Escape is pressed while editing the title', () => {
+      const onClose = vi.fn();
+      render(<TaskModal {...defaultProps} onClose={onClose} />);
+
+      fireEvent.click(screen.getByText('Test Task'));
+      const input = screen.getByDisplayValue('Test Task');
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('commits on blur, same as Enter', () => {
+      const onUpdateTask = vi.fn();
+      render(<TaskModal {...defaultProps} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Test Task'));
+      const input = screen.getByDisplayValue('Test Task');
+      fireEvent.change(input, { target: { value: 'Saved via blur' } });
+      fireEvent.blur(input);
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { title: 'Saved via blur' });
+    });
+
+    it('does not save an empty or whitespace-only title', () => {
+      const onUpdateTask = vi.fn();
+      render(<TaskModal {...defaultProps} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Test Task'));
+      const input = screen.getByDisplayValue('Test Task');
+      fireEvent.change(input, { target: { value: '   ' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onUpdateTask).not.toHaveBeenCalled();
+      expect(screen.getByText('Test Task')).toBeInTheDocument();
+    });
+
+    it('does not call onUpdateTask when the title is unchanged', () => {
+      const onUpdateTask = vi.fn();
+      render(<TaskModal {...defaultProps} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Test Task'));
+      const input = screen.getByDisplayValue('Test Task');
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onUpdateTask).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Due date picker discoverability', () => {
+    it('calls showPicker when clicking anywhere in the due date row', () => {
+      const showPicker = vi.fn();
+      // jsdom does not implement showPicker at all — inject it for this test
+      HTMLInputElement.prototype.showPicker = showPicker;
+
+      render(<TaskModal {...defaultProps} />);
+      fireEvent.click(screen.getByTestId('due-date-row'));
+
+      expect(showPicker).toHaveBeenCalledTimes(1);
+
+      // @ts-expect-error cleaning up the test-only polyfill
+      delete HTMLInputElement.prototype.showPicker;
+    });
+
+    it('does not throw when showPicker is not supported by the runtime', () => {
+      // simulate an embedded Chromium old enough not to have showPicker
+      // @ts-expect-error deliberately removing it to simulate lack of support
+      delete HTMLInputElement.prototype.showPicker;
+
+      render(<TaskModal {...defaultProps} />);
+
+      expect(() => fireEvent.click(screen.getByTestId('due-date-row'))).not.toThrow();
+    });
+
+    it('still updates the task when the date is changed directly', () => {
+      const onUpdateTask = vi.fn();
+      const task = { ...baseTask, dueDate: '2024-12-31' };
+      render(<TaskModal {...defaultProps} task={task} onUpdateTask={onUpdateTask} />);
+
+      const dateInput = screen.getByDisplayValue('2024-12-31');
+      fireEvent.change(dateInput, { target: { value: '2025-01-15' } });
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { dueDate: '2025-01-15' });
+    });
+  });
 });

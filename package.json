@@ -1,9 +1,9 @@
 {
-  "name": "kanban-md",
-  "displayName": "Kanban.md",
-  "description": "Transform your Markdown files into powerful, interactive Kanban boards",
-  "publisher": "wguilherme",
-  "version": "0.1.4",
+  "name": "md-kanban-tracker",
+  "displayName": "md-kanban-tracker",
+  "description": "Kanban board editor for .kanban.md files, with built-in WIP-limit/timer automation and inline editing — fork of kanban.md",
+  "publisher": "luismulato",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.106.0"
   },
@@ -27,22 +27,22 @@
   "main": "./dist/extension.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wguilherme/kanban.md"
+    "url": "https://github.com/luismulato/md-kanban-tracker"
   },
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "markdown-kanban",
-          "title": "Markdown Kanban",
+          "id": "md-kanban-tracker",
+          "title": "md-kanban-tracker",
           "icon": "$(markdown)"
         }
       ]
     },
     "views": {
-      "markdown-kanban": [
+      "md-kanban-tracker": [
         {
-          "id": "markdown-kanban.boards",
+          "id": "md-kanban-tracker.boards",
           "name": "Kanban Boards",
           "icon": "$(markdown)"
         }
@@ -50,73 +50,73 @@
     },
     "commands": [
       {
-        "command": "markdown-kanban.openKanban",
+        "command": "md-kanban-tracker.openKanban",
         "title": "Kanban",
-        "category": "Markdown Kanban"
+        "category": "md-kanban-tracker"
       },
       {
-        "command": "markdown-kanban.disableFileListener",
+        "command": "md-kanban-tracker.disableFileListener",
         "title": "Enable/Disable File Switcher",
-        "category": "Markdown Kanban"
+        "category": "md-kanban-tracker"
       },
       {
-        "command": "markdown-kanban.refresh",
+        "command": "md-kanban-tracker.refresh",
         "title": "Refresh",
         "icon": "$(refresh)",
-        "category": "Markdown Kanban"
+        "category": "md-kanban-tracker"
       },
       {
-        "command": "markdown-kanban.openFromSidebar",
+        "command": "md-kanban-tracker.openFromSidebar",
         "title": "Open Kanban Board",
         "icon": "$(open-preview)",
-        "category": "Markdown Kanban"
+        "category": "md-kanban-tracker"
       },
       {
-        "command": "markdown-kanban.newKanban",
+        "command": "md-kanban-tracker.newKanban",
         "title": "New Kanban Board",
         "icon": "$(add)",
-        "category": "Markdown Kanban"
+        "category": "md-kanban-tracker"
       },
       {
-        "command": "markdown-kanban.editMarkdown",
+        "command": "md-kanban-tracker.editMarkdown",
         "title": "Edit Markdown",
         "icon": "$(edit)",
-        "category": "Markdown Kanban"
+        "category": "md-kanban-tracker"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "markdown-kanban.newKanban",
-          "when": "view == markdown-kanban.boards",
+          "command": "md-kanban-tracker.newKanban",
+          "when": "view == md-kanban-tracker.boards",
           "group": "navigation@1"
         },
         {
-          "command": "markdown-kanban.refresh",
-          "when": "view == markdown-kanban.boards",
+          "command": "md-kanban-tracker.refresh",
+          "when": "view == md-kanban-tracker.boards",
           "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
-          "command": "markdown-kanban.editMarkdown",
-          "when": "view == markdown-kanban.boards && viewItem == kanbanFile",
+          "command": "md-kanban-tracker.editMarkdown",
+          "when": "view == md-kanban-tracker.boards && viewItem == kanbanFile",
           "group": "inline"
         }
       ],
       "editor/title": [
         {
-          "command": "markdown-kanban.openKanban",
-          "when": "resourceFilename =~ /\\.kanban\\.md$/ && markdownKanbanActive",
+          "command": "md-kanban-tracker.openKanban",
+          "when": "resourceFilename =~ /\\.kanban\\.md$/ && mdKanbanTrackerActive",
           "group": "navigation"
         }
       ]
     },
     "configuration": {
       "type": "object",
-      "title": "Markdown Kanban",
+      "title": "md-kanban-tracker",
       "properties": {
-        "markdown-kanban.taskHeader": {
+        "md-kanban-tracker.taskHeader": {
           "type": "string",
           "enum": [
             "title",
@@ -161,6 +161,7 @@
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/coverage-v8": "^4.1.11",
     "@vscode/codicons": "^0.0.43",
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.5.2",

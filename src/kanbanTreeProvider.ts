@@ -14,7 +14,7 @@ export class KanbanTreeItem extends vscode.TreeItem {
         this.contextValue = 'kanbanFile';
         this.iconPath = new vscode.ThemeIcon('markdown');
         this.command = {
-            command: 'markdown-kanban.openFromSidebar',
+            command: 'md-kanban-tracker.openFromSidebar',
             title: 'Open Kanban Board',
             arguments: [resourceUri]
         };

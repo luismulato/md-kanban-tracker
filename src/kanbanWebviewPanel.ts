@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { MarkdownKanbanParser, KanbanBoard, KanbanTask, KanbanColumn } from './markdownParser';
+import { currentWipTitle } from './automation/boardRules';
+import { ensureCompanionFolder } from './automation/companionFiles';
+import { applyBoardAutomation, ApplyBoardAutomationResult } from './automation/boardAutomation';
 
 /**
  * Creates a fingerprint of the board structure for content comparison.
@@ -16,7 +19,7 @@ function getBoardFingerprint(board: KanbanBoard): string {
 
 export class KanbanWebviewPanel {
     public static currentPanel: KanbanWebviewPanel | undefined;
-    public static readonly viewType = 'markdownKanbanPanel';
+    public static readonly viewType = 'mdKanbanTrackerPanel';
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;
@@ -48,6 +51,14 @@ export class KanbanWebviewPanel {
     // Flag to track if there are pending changes to save when modal closes
     private _hasPendingChanges = false;
 
+    // Board automation (single-WIP, daily archive, WIP-synced timer) —
+    // see src/automation/. Recomputed per-document since the panel is a
+    // singleton and only ever shows one board at a time.
+    private _companionDir?: string;
+    private _boardBaseName?: string;
+    private _previousWipTitle: string | null = null;
+    private _ensuredCompanionForPath?: string;
+
     public static createOrShow(extensionUri: vscode.Uri, context: vscode.ExtensionContext, document?: vscode.TextDocument) {
         const column = vscode.window.activeTextEditor?.viewColumn;
 
@@ -61,7 +72,7 @@ export class KanbanWebviewPanel {
 
         const panel = vscode.window.createWebviewPanel(
             KanbanWebviewPanel.viewType,
-            'Markdown Kanban',
+            'md-kanban-tracker',
             column || vscode.ViewColumn.One,
             {
                 enableScripts: true,
@@ -210,7 +221,62 @@ export class KanbanWebviewPanel {
             vscode.window.showErrorMessage(`Kanban parsing error: ${error instanceof Error ? error.message : String(error)}`);
             this._board = { title: 'Error Loading Board', columns: [] };
         }
+
+        // Board automation reacts to whatever WIP diff this reparse reveals
+        // (e.g. the user hand-edited the .md). If it mutates the board, save
+        // it back through the same deferred/immediate path performAction()
+        // uses, so we don't clobber an open modal or race an in-flight save.
+        const result = this._runBoardAutomation(null);
+        if (result?.boardChanged) {
+            if (this._isModalOpen) {
+                this._hasPendingChanges = true;
+            } else {
+                this._saveImmediately();
+            }
+        }
+
         this._update();
+    }
+
+    /**
+     * Applies single-WIP / daily-archive / timer-sync automation to the
+     * current in-memory board (src/automation/boardAutomation.ts), and
+     * ensures the md-kanban-tracker/ companion folder exists next to the
+     * .kanban.md file. Returns null if there's no board/document to act on,
+     * or the file isn't a .kanban.md.
+     *
+     * `justMovedTitle` is the title of the task the caller just moved/added
+     * (if any) — used to break ties when more than one task ends up in WIP.
+     * Callers that mutate `this._board` themselves (moveTask, addTask) are
+     * responsible for persisting the result; this method never saves.
+     */
+    private _runBoardAutomation(justMovedTitle: string | null): ApplyBoardAutomationResult | null {
+        if (!this._board || !this._document) {return null;}
+        const fsPath = this._document.uri.fsPath;
+        if (!fsPath.endsWith('.kanban.md')) {return null;}
+
+        if (this._ensuredCompanionForPath !== fsPath) {
+            const paths = ensureCompanionFolder(fsPath);
+            this._companionDir = paths.companionDir;
+            this._boardBaseName = paths.boardBaseName;
+            this._ensuredCompanionForPath = fsPath;
+            // First time we see this file (or switching back to it from
+            // another board): baseline on whatever's in WIP right now, so
+            // just opening/switching to it isn't itself treated as "a task
+            // just entered WIP".
+            this._previousWipTitle = currentWipTitle(this._board);
+        }
+        if (!this._companionDir || !this._boardBaseName) {return null;}
+
+        const result = applyBoardAutomation({
+            board: this._board,
+            companionDir: this._companionDir,
+            boardBaseName: this._boardBaseName,
+            previousWipTitle: this._previousWipTitle,
+            justMovedTitle,
+        });
+        this._previousWipTitle = result.newWipTitle;
+        return result;
     }
 
     private _update() {
@@ -350,7 +416,7 @@ export class KanbanWebviewPanel {
     private async _doSave() {
         if (!this._document || !this._board) {return;}
 
-        const config = vscode.workspace.getConfiguration('markdown-kanban');
+        const config = vscode.workspace.getConfiguration('md-kanban-tracker');
         const taskHeaderFormat = config.get<'title' | 'list'>('taskHeader', 'title');
 
         const markdown = MarkdownKanbanParser.generateMarkdown(this._board, taskHeaderFormat);
@@ -376,6 +442,8 @@ export class KanbanWebviewPanel {
 
             const task = fromColumn.tasks.splice(taskIndex, 1)[0];
             toColumn.tasks.splice(newIndex, 0, task);
+
+            this._runBoardAutomation(task.title);
         });
     }
 
@@ -413,6 +481,7 @@ export class KanbanWebviewPanel {
             };
 
             column.tasks.push(newTask);
+            this._runBoardAutomation(newTask.title);
         });
     }
 

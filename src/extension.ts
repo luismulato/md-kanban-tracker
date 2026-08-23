@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register TreeView for sidebar
 	const treeDataProvider = new KanbanTreeProvider();
-	const treeView = vscode.window.createTreeView('markdown-kanban.boards', {
+	const treeView = vscode.window.createTreeView('md-kanban-tracker.boards', {
 		treeDataProvider: treeDataProvider
 	});
 
@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	// Register open kanban command (opens in center area)
-	const openKanbanCommand = vscode.commands.registerCommand('markdown-kanban.openKanban', async (uri?: vscode.Uri) => {
+	const openKanbanCommand = vscode.commands.registerCommand('md-kanban-tracker.openKanban', async (uri?: vscode.Uri) => {
 		let targetUri = uri;
 
 		// If no URI provided, try to get from active editor
@@ -76,23 +76,23 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const disableFileListenerCommand = vscode.commands.registerCommand('markdown-kanban.disableFileListener', async () => {
+	const disableFileListenerCommand = vscode.commands.registerCommand('md-kanban-tracker.disableFileListener', async () => {
 		fileListenerEnabled = !fileListenerEnabled;
 	});
 
 	// Register refresh command for sidebar
-	const refreshCommand = vscode.commands.registerCommand('markdown-kanban.refresh', () => {
+	const refreshCommand = vscode.commands.registerCommand('md-kanban-tracker.refresh', () => {
 		treeDataProvider.refresh();
 	});
 
 	// Register command to open kanban from sidebar
-	const openFromSidebarCommand = vscode.commands.registerCommand('markdown-kanban.openFromSidebar', async (uri: vscode.Uri) => {
+	const openFromSidebarCommand = vscode.commands.registerCommand('md-kanban-tracker.openFromSidebar', async (uri: vscode.Uri) => {
 		const document = await vscode.workspace.openTextDocument(uri);
 		KanbanWebviewPanel.createOrShow(context.extensionUri, context, document);
 	});
 
 	// Register command to edit markdown file directly
-	const editMarkdownCommand = vscode.commands.registerCommand('markdown-kanban.editMarkdown', async (item: any) => {
+	const editMarkdownCommand = vscode.commands.registerCommand('md-kanban-tracker.editMarkdown', async (item: any) => {
 		// item can be KanbanTreeItem (from context menu) or Uri (from other sources)
 		const uri = item.resourceUri || item;
 		const document = await vscode.workspace.openTextDocument(uri);
@@ -100,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	// Register command to create new kanban board
-	const newKanbanCommand = vscode.commands.registerCommand('markdown-kanban.newKanban', async () => {
+	const newKanbanCommand = vscode.commands.registerCommand('md-kanban-tracker.newKanban', async () => {
 		// Get workspace folder
 		const workspaceFolders = vscode.workspace.workspaceFolders;
 		if (!workspaceFolders || workspaceFolders.length === 0) {
@@ -189,13 +189,13 @@ export function activate(context: vscode.ExtensionContext) {
 	// Listen for active editor changes
 	const activeEditorChangeListener = vscode.window.onDidChangeActiveTextEditor((editor) => {
 		if (editor && editor.document.fileName.endsWith('.kanban.md') && fileListenerEnabled) {
-			vscode.commands.executeCommand('setContext', 'markdownKanbanActive', true);
+			vscode.commands.executeCommand('setContext', 'mdKanbanTrackerActive', true);
 			// If panel is open, auto-load current document
 			if (KanbanWebviewPanel.currentPanel) {
 				KanbanWebviewPanel.currentPanel.loadMarkdownFile(editor.document);
 			}
 		} else {
-			vscode.commands.executeCommand('setContext', 'markdownKanbanActive', false);
+			vscode.commands.executeCommand('setContext', 'mdKanbanTrackerActive', false);
 		}
 	});
 
@@ -214,12 +214,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// If there's an active kanban editor, auto-activate kanban
 	if (vscode.window.activeTextEditor?.document.fileName.endsWith('.kanban.md')) {
-		vscode.commands.executeCommand('setContext', 'markdownKanbanActive', true);
+		vscode.commands.executeCommand('setContext', 'mdKanbanTrackerActive', true);
 	}
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() {
 	// Clear context
-	vscode.commands.executeCommand('setContext', 'markdownKanbanActive', false);
+	vscode.commands.executeCommand('setContext', 'mdKanbanTrackerActive', false);
 }

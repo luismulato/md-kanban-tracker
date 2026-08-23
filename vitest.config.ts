@@ -11,7 +11,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/webview/**/*.{ts,tsx}'],
+      include: ['src/webview/**/*.{ts,tsx}', 'src/automation/**/*.ts'],
       exclude: ['src/webview/__tests__/**', 'src/webview/main.tsx'],
     },
   },

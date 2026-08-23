@@ -1,34 +1,43 @@
-# Kanban.md
+# md-kanban-tracker
 
 <div align="center">
 
 ![Kanban.md Logo](./imgs/logo.png)
 
-**Transform your Markdown files into powerful, interactive Kanban boards**
+**A Markdown Kanban board with built-in WIP tracking — no external scripts, no watchers**
 
-[![Version](https://img.shields.io/badge/version-0.1.3-blue.svg)](https://marketplace.visualstudio.com/items?itemName=wguilherme.kanban-md)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/luismulato/md-kanban-tracker)
 [![VSCode](https://img.shields.io/badge/VSCode-1.74.0+-green.svg)](https://code.visualstudio.com/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Contributing](#-contributing) • [Changelog](CHANGELOG.md)
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Contributing](#-contributing) • [Changelog](CHANGELOG.md) • [Español](README.es.md)
 
 </div>
 
 ---
 
+## 🍴 About this fork
+
+**md-kanban-tracker** is a fork of [kanban.md](https://github.com/wguilherme/kanban.md) by Withney Guilherme, licensed MIT (kept as-is — see [`LICENSE.txt`](LICENSE.txt)). It adds board-level automation (single active WIP task, daily Done archiving, a WIP-synced timer) directly in the extension backend, plus inline title editing and a more discoverable due-date picker. It is not affiliated with or endorsed by the original project; all credit for the original architecture and design goes to its author.
+
 ## 📖 Overview
 
-**Kanban.md** is a modern VSCode extension that brings the power of Kanban boards directly into your Markdown workflow. Manage tasks, track progress, and organize projects using plain Markdown files with a beautiful, interactive drag-and-drop interface.
+**md-kanban-tracker** is a VSCode extension that brings the power of Kanban boards directly into your Markdown workflow, with automatic WIP/time tracking built in. Manage tasks, track progress, and organize projects using plain Markdown files with a beautiful, interactive drag-and-drop interface — no external scripts or file watchers needed to keep WIP limits and time logs honest.
 
-Built with modern technologies (React 19, TypeScript 5.9, Vite 7) and designed to respect your VSCode theme, Kanban.md seamlessly integrates with your development environment.
-
-> **Note**: This project is inspired by [holooooo/markdown-kanban](https://github.com/holooooo/markdown-kanban). It has been completely refactored with modern technologies and architectural patterns to provide enhanced performance and maintainability.
+Built with modern technologies (React 19, TypeScript 5.9, Vite 7) and designed to respect your VSCode theme, md-kanban-tracker seamlessly integrates with your development environment.
 
 ![Kanban Board Demo](./imgs/image.png)
 
 ---
 
 ## ✨ Features
+
+### ⏱️ Board Automation (new in this fork)
+
+- **Single WIP task**: dragging a second task into the `WIP` column automatically sends the previous occupant to the top of `To Do` — no more than one thing "in progress" at a time.
+- **Daily Done archiving**: the first time a task enters `WIP` each day, everything sitting in `Done` moves to the end of `Done Done`, so `Done` only ever shows what was finished today.
+- **WIP-synced timer**: moving a task into WIP starts a timer for it automatically; moving it out stops the timer and appends a line to a per-board `.timelog.md` file. Switching focus (one task leaves WIP, another enters) stops the old timer and starts the new one in a single step. A manually-started timer for something that isn't in WIP is never touched by this.
+- **Companion folder**: the first time you open a `.kanban.md` file, a `md-kanban-tracker/` folder appears next to it with the timelog, a usage guide, and a short readme — all generated automatically, nothing to set up.
 
 ### 🎯 Core Functionality
 
@@ -47,10 +56,11 @@ Built with modern technologies (React 19, TypeScript 5.9, Vite 7) and designed t
 - **Workload Tracking**: Four intensity levels with diamond icons
   - Easy (◇), Normal (◈), Hard (◆), Extreme (◆◆)
 - **Editable Task Modal**: Click any task to open a modal where you can:
+  - Click the title to rename it in place — `Enter` saves, `Esc` discards the edit and restores the original title
   - Click badges to cycle through priority/workload values
   - Add, remove, and edit subtasks inline
   - Edit description with save-on-blur
-  - Set due dates with date picker
+  - Set due dates — click anywhere in the due-date row to open the native calendar picker, not just the small icon
   - Unsaved changes indicator (●) shown in header
 - **Step-by-Step Tasks**: Checkbox-based subtasks using `- [ ] step` format
 - **Tag System**: Multiple tagging formats supported:
@@ -88,24 +98,29 @@ Built with modern technologies (React 19, TypeScript 5.9, Vite 7) and designed t
   - Memoized components (`React.memo`) to prevent unnecessary re-renders
   - Single HTML build per panel lifecycle
   - Ref-based state tracking for message handlers
-- **Collision Detection**: Smart `closestCorners` algorithm for accurate drop targeting
+- **Collision Detection**: `pointerWithin` as the primary strategy, falling back to `closestCorners` — fixes dropping onto columns with zero tasks, which `closestCorners` alone can miss
 - **Cross-Column Preview**: Real-time visual feedback when dragging tasks between columns
 
 ---
 
 ## 🚀 Installation
 
-### From VSCode Marketplace
+This fork is not published to the VSCode Marketplace — install it from a `.vsix` build.
 
-1. Open VSCode
-2. Press `Ctrl+Shift+X` (Windows/Linux) or `Cmd+Shift+X` (Mac)
-3. Search for **"Markdown Kanban"**
-4. Click **Install**
-
-### From VSIX
+### From a prebuilt `.vsix`
 
 ```bash
-code --install-extension kanban-md-0.1.3.vsix
+code --install-extension md-kanban-tracker-0.1.0.vsix
+```
+
+### Building your own `.vsix`
+
+```bash
+git clone https://github.com/luismulato/md-kanban-tracker.git
+cd md-kanban-tracker
+npm install
+npx @vscode/vsce package --no-dependencies
+code --install-extension md-kanban-tracker-0.1.0.vsix
 ```
 
 ### Requirements
@@ -186,7 +201,7 @@ Choose any method:
 
 - **Method 1**: Click a board in the sidebar
 - **Method 2**: Right-click `.kanban.md` file → **"Kanban"**
-- **Method 3**: Command Palette (`Ctrl/Cmd+Shift+P`) → **"Markdown Kanban: Kanban"**
+- **Method 3**: Command Palette (`Ctrl/Cmd+Shift+P`) → **"md-kanban-tracker: Kanban"**
 
 #### 3️⃣ Manage Tasks
 
@@ -265,9 +280,9 @@ Task description here
 
 ### Settings
 
-Access via `File > Preferences > Settings` → Search "Markdown Kanban"
+Access via `File > Preferences > Settings` → Search "md-kanban-tracker"
 
-#### `markdown-kanban.taskHeader`
+#### `md-kanban-tracker.taskHeader`
 
 Choose task format in Markdown files:
 
@@ -276,7 +291,7 @@ Choose task format in Markdown files:
 
 ```json
 {
-  "markdown-kanban.taskHeader": "title"
+  "md-kanban-tracker.taskHeader": "title"
 }
 ```
 
@@ -284,10 +299,10 @@ Choose task format in Markdown files:
 
 | Command | Shortcut | Description |
 |---------|----------|-------------|
-| `Markdown Kanban: Kanban` | - | Open Kanban view for current file |
-| `Markdown Kanban: New Kanban Board` | - | Create new kanban file |
-| `Markdown Kanban: Refresh` | - | Refresh sidebar board list |
-| `Markdown Kanban: Enable/Disable File Switcher` | - | Toggle automatic file switching |
+| `md-kanban-tracker: Kanban` | - | Open Kanban view for current file |
+| `md-kanban-tracker: New Kanban Board` | - | Create new kanban file |
+| `md-kanban-tracker: Refresh` | - | Refresh sidebar board list |
+| `md-kanban-tracker: Enable/Disable File Switcher` | - | Toggle automatic file switching |
 
 ---
 
@@ -304,8 +319,8 @@ npm --version
 
 ```bash
 # Clone repository
-git clone https://github.com/wguilherme/kanban.md.git
-cd kanban.md
+git clone https://github.com/luismulato/md-kanban-tracker.git
+cd md-kanban-tracker
 
 # Install dependencies
 npm install
@@ -379,13 +394,13 @@ This project uses **Vite 7** with dual configurations:
 
 ## 🤝 Contributing
 
-We welcome contributions! Whether it's bug reports, feature requests, or pull requests, your input helps make Markdown Kanban better.
+We welcome contributions! Whether it's bug reports, feature requests, or pull requests, your input helps make md-kanban-tracker better.
 
 ### How to Contribute
 
 1. **Fork the repository**
    ```bash
-   gh repo fork wguilherme/kanban.md
+   gh repo fork luismulato/md-kanban-tracker
    ```
 
 2. **Create a feature branch**
@@ -433,7 +448,7 @@ We welcome contributions! Whether it's bug reports, feature requests, or pull re
 ### Development Tips
 
 - Use **React DevTools** for debugging webview components
-- Check `Output > Markdown Kanban` for extension logs
+- Check `Output > md-kanban-tracker` for extension logs
 - Test with multiple VSCode themes to ensure UI compatibility
 - Verify `.kanban.md` file sync works bidirectionally
 
@@ -451,7 +466,7 @@ We welcome contributions! Whether it's bug reports, feature requests, or pull re
 
 ## 🐛 Bug Reports
 
-Found a bug? Please [open an issue](https://github.com/wguilherme/kanban.md/issues/new) with:
+Found a bug? Please [open an issue](https://github.com/luismulato/md-kanban-tracker/issues/new) with:
 
 - **VSCode version**: `Help > About`
 - **Extension version**: Check extensions panel
@@ -465,33 +480,30 @@ Found a bug? Please [open an issue](https://github.com/wguilherme/kanban.md/issu
 
 ## 💬 Support
 
-- **Issues**: [GitHub Issues](https://github.com/wguilherme/kanban.md/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/wguilherme/kanban.md/discussions)
-- **Marketplace**: [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=wguilherme.markdown-kanban)
+- **Issues**: [GitHub Issues](https://github.com/luismulato/md-kanban-tracker/issues)
+- **Not affiliated with the marketplace listing** of the original `kanban.md` — this fork is not published to the VSCode Marketplace, install it locally from a `.vsix` (see Installation).
 
 ---
 
 ## 📜 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** — see [`LICENSE.txt`](LICENSE.txt). It's a fork of [wguilherme/kanban.md](https://github.com/wguilherme/kanban.md), also MIT — the original license and copyright notice are kept as-is.
 
 ---
 
 ## 🙏 Acknowledgments
 
+- Forked from [kanban.md](https://github.com/wguilherme/kanban.md) by Withney Guilherme — all credit for the original architecture, design, and the bulk of the codebase goes there.
 - Built with [VSCode Extension API](https://code.visualstudio.com/api)
 - Drag & drop powered by [@dnd-kit](https://dndkit.com/)
 - UI components follow [Atomic Design](https://atomicdesign.bradfrost.com/) principles
-- Special thanks to all [contributors](https://github.com/wguilherme/kanban.md/graphs/contributors)
 
 ---
 
 ## 📊 Project Stats
 
-![GitHub stars](https://img.shields.io/github/stars/wguilherme/kanban.md?style=social)
-![GitHub forks](https://img.shields.io/github/forks/wguilherme/kanban.md?style=social)
-![GitHub issues](https://img.shields.io/github/issues/wguilherme/kanban.md)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/wguilherme/kanban.md)
+![GitHub stars](https://img.shields.io/github/stars/luismulato/md-kanban-tracker?style=social)
+![GitHub issues](https://img.shields.io/github/issues/luismulato/md-kanban-tracker)
 
 ---
 
@@ -499,6 +511,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **Made with ❤️ by the open source community**
 
-[⬆ Back to top](#kanbanmd)
+[⬆ Back to top](#md-kanban-tracker)
 
 </div>

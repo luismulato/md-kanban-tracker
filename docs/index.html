@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kanban.md - Visual Kanban boards for VS Code</title>
-  <meta name="description" content="Transform any Markdown file into a visual Kanban board. Drag, drop, and organize your tasks without leaving VS Code.">
+  <title>md-kanban-tracker - Kanban boards with built-in WIP tracking for VS Code</title>
+  <meta name="description" content="A Markdown Kanban board for VS Code with single-WIP enforcement, daily archiving, and a WIP-synced timer built in — no external scripts. Fork of kanban.md.">
   <style>
     :root {
       --bg: #0d1117;
@@ -222,36 +222,52 @@
 <body>
   <div class="container">
     <header>
-      <h1><code>Kanban.md</code></h1>
-      <p class="tagline">VS Code meets Kanban. Transform any Markdown file into a visual board.</p>
+      <h1><code>md-kanban-tracker</code></h1>
+      <p class="tagline">VS Code meets Kanban, with WIP tracking built in — no external scripts, no watchers.</p>
       <div class="cta-buttons">
-        <a href="https://marketplace.visualstudio.com/items?itemName=wguilherme.kanban-md" class="btn btn-primary">
-          Install Extension
+        <a href="https://github.com/luismulato/md-kanban-tracker" class="btn btn-primary">
+          Get the .vsix on GitHub
         </a>
         <a href="https://github.com/wguilherme/kanban.md" class="btn btn-secondary">
-          View on GitHub
+          Original project (kanban.md)
         </a>
       </div>
     </header>
 
     <main>
+      <p style="margin-top: 2rem;">
+        <strong>md-kanban-tracker</strong> is a fork of
+        <a href="https://github.com/wguilherme/kanban.md" style="color: var(--accent)">kanban.md</a>
+        by Withney Guilherme, licensed MIT — the license is kept as-is, and all
+        credit for the original architecture and design goes to its author.
+        This fork is not affiliated with or endorsed by the original project.
+      </p>
+
       <h2>Features</h2>
       <div class="features">
         <div class="feature">
-          <h3>Drag & Drop</h3>
-          <p>Flicker-free task management with smooth animations and cross-column preview.</p>
+          <h3>Single WIP task</h3>
+          <p>Drag a second task into WIP and the previous one goes back to the top of To Do, automatically.</p>
+        </div>
+        <div class="feature">
+          <h3>Daily Done archiving</h3>
+          <p>The first task to enter WIP each day archives everything in Done into Done Done — no manual cleanup.</p>
+        </div>
+        <div class="feature">
+          <h3>WIP-synced timer</h3>
+          <p>Moving a task into WIP starts its timer; moving it out stops it and logs the time. No watcher process required.</p>
+        </div>
+        <div class="feature">
+          <h3>Editable title</h3>
+          <p>Click a task's title to rename it in place. Enter saves, Escape reverts — without closing the modal.</p>
+        </div>
+        <div class="feature">
+          <h3>Discoverable due date</h3>
+          <p>Click anywhere in the due-date row to open the native calendar picker, not just the small icon.</p>
         </div>
         <div class="feature">
           <h3>Pure Markdown</h3>
           <p>Your data stays in <code>.md</code> files. No lock-in, no sync, no cloud.</p>
-        </div>
-        <div class="feature">
-          <h3>Real-time Sync</h3>
-          <p>Changes in the board reflect instantly in your Markdown file and vice-versa.</p>
-        </div>
-        <div class="feature">
-          <h3>Rich Tasks</h3>
-          <p>Priorities, due dates, checklists, hashtags, and workload indicators.</p>
         </div>
       </div>
 
@@ -269,20 +285,21 @@
 ## Done
 ### Completed task</code></pre>
 
-      <h2>Why Kanban.md?</h2>
+      <h2>Why md-kanban-tracker?</h2>
       <ul>
         <li><strong>No context switching</strong> — manage tasks without leaving your editor</li>
         <li><strong>Version control friendly</strong> — it's just Markdown, commit and diff as usual</li>
         <li><strong>Works offline</strong> — no account, no internet required</li>
-        <li><strong>Lightweight</strong> — built with React 19 and optimized for performance</li>
+        <li><strong>No external scripts</strong> — WIP limits and time tracking run inside the extension itself</li>
       </ul>
     </main>
 
     <footer>
       <p>
-        Made by <a href="https://github.com/wguilherme">@wguilherme</a> ·
-        <a href="https://github.com/wguilherme/kanban.md">GitHub</a> ·
-        <a href="https://marketplace.visualstudio.com/items?itemName=wguilherme.kanban-md">VS Code Marketplace</a>
+        Fork by <a href="https://github.com/luismulato">@luismulato</a> ·
+        <a href="https://github.com/luismulato/md-kanban-tracker">GitHub</a> ·
+        original project: <a href="https://github.com/wguilherme/kanban.md">kanban.md</a> by
+        <a href="https://github.com/wguilherme">@wguilherme</a> (MIT)
       </p>
     </footer>
   </div>

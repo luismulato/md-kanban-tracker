@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { KanbanTask } from '../types/kanban';
 
 interface TaskModalProps {
@@ -20,6 +20,7 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
   const [localSteps, setLocalSteps] = useState(task.steps || []);
   const [localDescription, setLocalDescription] = useState(task.description || '');
   const [localTitle, setLocalTitle] = useState(task.title || '');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   // sync local state when task changes
   useEffect(() => {
@@ -28,10 +29,44 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
     setLocalTitle(task.title || '');
   }, [task.steps, task.description, task.title]);
 
+  // create-mode title input: saves on every keystroke, no click-to-edit involved
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalTitle(e.target.value);
     if (onUpdateTask) {
       onUpdateTask(task.id, { title: e.target.value });
+    }
+  };
+
+  // existing-task title: click-to-edit, Enter/blur commits, Escape reverts
+  const handleTitleClick = () => {
+    setLocalTitle(task.title || '');
+    setIsEditingTitle(true);
+  };
+
+  const commitTitleEdit = () => {
+    if (onUpdateTask) {
+      const trimmed = localTitle.trim();
+      if (trimmed.length > 0 && trimmed !== task.title) {
+        onUpdateTask(task.id, { title: trimmed });
+      }
+    }
+    setIsEditingTitle(false);
+  };
+
+  const revertTitleEdit = () => {
+    setLocalTitle(task.title || '');
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      commitTitleEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      revertTitleEdit();
     }
   };
 
@@ -96,6 +131,24 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
   const handleDueDateChange = (date: string) => {
     if (!onUpdateTask) return;
     onUpdateTask(task.id, { dueDate: date || undefined });
+  };
+
+  const dueDateInputRef = useRef<HTMLInputElement>(null);
+
+  // Native <input type="date"> only opens its calendar when you hit the
+  // tiny icon exactly. showPicker() lets a click anywhere in the row open
+  // it. Must be called synchronously from a real click (not a promise) or
+  // browsers refuse it — feature-detect since jsdom (tests) and older
+  // embedded Chromium versions don't implement it.
+  const handleDueDateRowClick = () => {
+    const input = dueDateInputRef.current;
+    if (input && typeof input.showPicker === 'function') {
+      try {
+        input.showPicker();
+      } catch {
+        // ignore — e.g. browser refused because this wasn't a direct user gesture
+      }
+    }
   };
 
   // helper to stop event propagation (prevents dnd-kit from capturing events)
@@ -218,8 +271,24 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
                 {...stopProp}
                 className="text-xl font-semibold text-vscode-foreground flex-1 bg-transparent border-b border-vscode-input-border focus:outline-none focus:border-vscode-primary pb-1"
               />
+            ) : isEditingTitle ? (
+              <input
+                type="text"
+                value={localTitle}
+                onChange={(e) => setLocalTitle(e.target.value)}
+                onKeyDown={handleTitleEditKeyDown}
+                onBlur={commitTitleEdit}
+                autoFocus
+                {...stopProp}
+                aria-label="Task title"
+                className="text-xl font-semibold text-vscode-foreground flex-1 bg-transparent border-b border-vscode-input-border focus:outline-none focus:border-vscode-primary pb-1"
+              />
             ) : (
-              <h2 className="text-xl font-semibold text-vscode-foreground flex-1">
+              <h2
+                onClick={handleTitleClick}
+                className="text-xl font-semibold text-vscode-foreground flex-1 cursor-text rounded hover:bg-vscode-list-hoverBg transition-colors"
+                title="Click to edit"
+              >
                 {task.title}
               </h2>
             )}
@@ -261,13 +330,16 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
             <h3 className="text-sm font-semibold text-vscode-foreground mb-2">
               Due Date
             </h3>
-            <input
-              type="date"
-              value={task.dueDate || ''}
-              onChange={(e) => handleDueDateChange(e.target.value)}
-              {...stopProp}
-              className="w-full px-3 py-2 text-sm bg-vscode-input-bg text-vscode-foreground border border-vscode-input-border rounded focus:outline-none focus:border-vscode-primary"
-            />
+            <div onClick={handleDueDateRowClick} data-testid="due-date-row">
+              <input
+                ref={dueDateInputRef}
+                type="date"
+                value={task.dueDate || ''}
+                onChange={(e) => handleDueDateChange(e.target.value)}
+                {...stopProp}
+                className="w-full px-3 py-2 text-sm bg-vscode-input-bg text-vscode-foreground border border-vscode-input-border rounded focus:outline-none focus:border-vscode-primary cursor-pointer"
+              />
+            </div>
           </div>
 
           {/* Description */}
