@@ -23,6 +23,7 @@ interface KanbanState {
   dragPreview: KanbanColumn[] | null;
   openTaskId: string | null;
   newTaskColumnId: string | null;
+  selectedTaskIds: Set<string>;
 
   // internal
   _fingerprint: string;
@@ -38,6 +39,11 @@ interface KanbanState {
   reorderTask: (columnId: string, oldIndex: number, newIndex: number) => void;
   moveTaskToTop: (columnId: string, taskId: string) => void;
   deleteTask: (columnId: string, taskId: string) => void;
+  moveSelectedTasks: (taskIds: string[], toColumnId: string, atIndex: number) => void;
+
+  // selection operations
+  toggleTaskSelection: (taskId: string) => void;
+  clearSelection: () => void;
 
   // drag operations
   startDrag: (taskId: string) => void;
@@ -59,6 +65,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
   dragPreview: null,
   openTaskId: null,
   newTaskColumnId: null,
+  selectedTaskIds: new Set(),
   _fingerprint: '',
 
   setBoard: (board) => {
@@ -310,6 +317,77 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     }
   },
 
+  moveSelectedTasks: (taskIds, toColumnId, atIndex) => {
+    const state = get();
+    if (!state.board) return;
+
+    const movingIds = new Set(taskIds);
+
+    // preserve original board order (across columns) for the moved group,
+    // and remember each task's original column to notify the backend
+    const tasksToMove: KanbanTask[] = [];
+    const fromColumnByTaskId = new Map<string, string>();
+    for (const col of state.board.columns) {
+      for (const task of col.tasks) {
+        if (movingIds.has(task.id)) {
+          tasksToMove.push(task);
+          fromColumnByTaskId.set(task.id, col.id);
+        }
+      }
+    }
+    if (tasksToMove.length === 0) return;
+
+    const newColumns = state.board.columns.map(col => ({
+      ...col,
+      tasks: col.tasks.filter(t => !movingIds.has(t.id)),
+    }));
+
+    const targetColumn = newColumns.find(c => c.id === toColumnId);
+    if (!targetColumn) return;
+
+    const clampedIndex = Math.min(atIndex, targetColumn.tasks.length);
+    targetColumn.tasks.splice(clampedIndex, 0, ...tasksToMove);
+
+    const newBoard = { ...state.board, columns: newColumns };
+    const newFingerprint = getBoardFingerprint(newBoard);
+
+    set({
+      board: newBoard,
+      _fingerprint: newFingerprint,
+      selectedTaskIds: new Set(),
+    });
+
+    // post one moveTask message per task, in order, so the backend
+    // (which only understands single-task moves) ends up with the same result
+    tasksToMove.forEach((task, i) => {
+      try {
+        getVSCodeAPI().postMessage({
+          type: 'moveTask',
+          taskId: task.id,
+          fromColumnId: fromColumnByTaskId.get(task.id),
+          toColumnId,
+          newIndex: clampedIndex + i,
+        });
+      } catch {
+        // ignore in test environment
+      }
+    });
+  },
+
+  toggleTaskSelection: (taskId) => {
+    set((state) => {
+      const next = new Set(state.selectedTaskIds);
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
+      return { selectedTaskIds: next };
+    });
+  },
+
+  clearSelection: () => set({ selectedTaskIds: new Set() }),
+
   startDrag: (taskId) => {
     const state = get();
     if (!state.board) return;
@@ -389,6 +467,9 @@ export const useModalTask = () =>
     return null;
   });
 
+export const useIsTaskSelected = (taskId: string) =>
+  useKanbanStore((state) => state.selectedTaskIds.has(taskId));
+export const useSelectedTaskCount = () => useKanbanStore((state) => state.selectedTaskIds.size);
 export const useIsDragging = () => useKanbanStore((state) => state.isDragging);
 export const useIsModalOpen = () => useKanbanStore((state) => state.openTaskId !== null || state.newTaskColumnId !== null);
 export const useIsLoading = () => useKanbanStore((state) => state.isLoading);

@@ -7,6 +7,7 @@ interface TaskCardProps {
   task: KanbanTask;
   isDragging?: boolean;
   isOverlay?: boolean;
+  isSelected?: boolean;
   onUpdateTask?: (taskId: string, updates: Partial<KanbanTask>) => void;
 }
 
@@ -19,7 +20,7 @@ function getPriorityBorderClass(priority: string) {
   }
 }
 
-function TaskCardComponent({ task, isDragging = false, isOverlay = false, onUpdateTask }: TaskCardProps) {
+function TaskCardComponent({ task, isDragging = false, isOverlay = false, isSelected = false, onUpdateTask }: TaskCardProps) {
   const baseClasses = 'bg-vscode-background p-3 rounded border';
 
   const priorityClasses = task.priority ? getPriorityBorderClass(task.priority) : '';
@@ -30,6 +31,8 @@ function TaskCardComponent({ task, isDragging = false, isOverlay = false, onUpda
     ? 'opacity-40 border-vscode-focusBorder'
     : 'border-vscode-input-border';
 
+  const selectionClasses = isSelected ? 'ring-2 ring-vscode-focusBorder bg-vscode-list-hoverBg' : '';
+
   const handleTypeClick = (e: React.MouseEvent) => {
     // click cycles the type; stop propagation so it doesn't also open the task modal
     e.stopPropagation();
@@ -37,7 +40,7 @@ function TaskCardComponent({ task, isDragging = false, isOverlay = false, onUpda
   };
 
   return (
-    <div className={`${baseClasses} ${stateClasses} ${priorityClasses}`}>
+    <div className={`${baseClasses} ${stateClasses} ${priorityClasses} ${selectionClasses}`}>
       {task.type && (
         <Badge
           variant={TASK_TYPE_BADGE_VARIANT[task.type]}
@@ -82,6 +85,7 @@ export const TaskCard = memo(TaskCardComponent, (prevProps, nextProps) => {
     prevProps.task.workload === nextProps.task.workload &&
     prevProps.isDragging === nextProps.isDragging &&
     prevProps.isOverlay === nextProps.isOverlay &&
+    prevProps.isSelected === nextProps.isSelected &&
     JSON.stringify(prevProps.task.tags) === JSON.stringify(nextProps.task.tags) &&
     JSON.stringify(prevProps.task.steps) === JSON.stringify(nextProps.task.steps)
   );

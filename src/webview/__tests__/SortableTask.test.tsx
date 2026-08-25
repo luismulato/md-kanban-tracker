@@ -277,3 +277,93 @@ describe('SortableTask context menu', () => {
     vi.restoreAllMocks();
   });
 });
+
+describe('SortableTask multi-select', () => {
+  const baseTask: KanbanTask = {
+    id: 'task-1',
+    title: 'Test Task',
+  };
+
+  beforeEach(() => {
+    useKanbanStore.setState({
+      board: {
+        title: 'Board',
+        columns: [
+          {
+            id: 'col-1',
+            title: 'To Do',
+            tasks: [
+              baseTask,
+              { id: 'task-2', title: 'Second Task' },
+            ],
+          },
+        ],
+      },
+      isLoading: false,
+      isDragging: false,
+      dragPreview: null,
+      openTaskId: null,
+      selectedTaskIds: new Set(),
+    });
+  });
+
+  const wrapperWithChecker = ({ children }: { children: React.ReactNode }) => (
+    <DndContext>
+      <SortableContext items={['task-1', 'task-2']}>
+        {children}
+        <ModalChecker />
+      </SortableContext>
+    </DndContext>
+  );
+
+  it('toggles selection on Cmd+click instead of opening the modal', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper: wrapperWithChecker }
+    );
+
+    fireEvent.click(screen.getByText('Test Task'), { metaKey: true });
+
+    expect(useKanbanStore.getState().selectedTaskIds.has('task-1')).toBe(true);
+    expect(isModalOpenViaStore()).toBe(false);
+  });
+
+  it('toggles selection on Ctrl+click too', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByText('Test Task'), { ctrlKey: true });
+
+    expect(useKanbanStore.getState().selectedTaskIds.has('task-1')).toBe(true);
+  });
+
+  it('deselects a task on a second Cmd+click', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByText('Test Task'), { metaKey: true });
+    fireEvent.click(screen.getByText('Test Task'), { metaKey: true });
+
+    expect(useKanbanStore.getState().selectedTaskIds.has('task-1')).toBe(false);
+  });
+
+  it('a plain click still opens the modal and does not touch the selection', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper: wrapperWithChecker }
+    );
+
+    fireEvent.click(screen.getByText('Test Task'));
+
+    expect(isModalOpenViaStore()).toBe(true);
+    expect(useKanbanStore.getState().selectedTaskIds.has('task-1')).toBe(false);
+  });
+});

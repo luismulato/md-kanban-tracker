@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -22,11 +22,13 @@ import {
   useKanbanStore,
   useDisplayColumns,
   useBoard,
+  useSelectedTaskCount,
 } from '../../stores/kanbanStore';
 
 export function KanbanBoard() {
   const board = useBoard();
   const columns = useDisplayColumns();
+  const selectedTaskCount = useSelectedTaskCount();
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null);
 
   // store actions
@@ -36,7 +38,18 @@ export function KanbanBoard() {
   const cancelDrag = useKanbanStore((s) => s.cancelDrag);
   const moveTask = useKanbanStore((s) => s.moveTask);
   const reorderTask = useKanbanStore((s) => s.reorderTask);
+  const moveSelectedTasks = useKanbanStore((s) => s.moveSelectedTasks);
   const updateTask = useKanbanStore((s) => s.updateTask);
+  const clearSelection = useKanbanStore((s) => s.clearSelection);
+
+  // Escape clears the current multi-selection
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') clearSelection();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [clearSelection]);
 
   // track original position before drag
   const dragStartState = useRef<{
@@ -182,6 +195,8 @@ export function KanbanBoard() {
     }
 
     const targetIndex = targetColumn.tasks.findIndex(t => t.id === activeTaskId);
+    const selectedTaskIds = useKanbanStore.getState().selectedTaskIds;
+    const isMultiDrag = selectedTaskIds.size > 1 && selectedTaskIds.has(activeTaskId);
 
     // check if position actually changed
     const sameColumn = startState.sourceColumnId === targetColumn.id;
@@ -189,6 +204,12 @@ export function KanbanBoard() {
 
     // end drag first to clear isDragging flag
     endDrag();
+
+    if (isMultiDrag) {
+      // drag any selected card to move the whole selection together
+      moveSelectedTasks(Array.from(selectedTaskIds), targetColumn.id, targetIndex);
+      return;
+    }
 
     if (sameColumn && sameIndex) {
       // no change, nothing to persist
@@ -202,7 +223,7 @@ export function KanbanBoard() {
       // moved to different column
       moveTask(activeTaskId, startState.sourceColumnId, targetColumn.id, targetIndex);
     }
-  }, [findColumnByTaskId, moveTask, reorderTask, endDrag]);
+  }, [findColumnByTaskId, moveTask, reorderTask, moveSelectedTasks, endDrag]);
 
   const handleDragCancel = useCallback(() => {
     setActiveTask(null);
@@ -237,8 +258,13 @@ export function KanbanBoard() {
       onDragCancel={handleDragCancel}
     >
       <div className="h-screen flex flex-col bg-vscode-background text-vscode-foreground">
-        <header className="p-4 border-b border-vscode-input-border">
+        <header className="p-4 border-b border-vscode-input-border flex items-center justify-between">
           <h1 className="text-2xl font-bold">{board.title || 'Kanban Board'}</h1>
+          {selectedTaskCount > 0 && (
+            <span className="text-sm text-vscode-foreground opacity-70">
+              {selectedTaskCount} selected — drag to move, Esc to clear
+            </span>
+          )}
         </header>
 
         <main className="flex-1 overflow-auto p-4">

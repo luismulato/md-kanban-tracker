@@ -42,6 +42,7 @@ describe('kanbanStore', () => {
       dragPreview: null,
       openTaskId: null,
       newTaskColumnId: null,
+      selectedTaskIds: new Set(),
     });
   });
 
@@ -365,6 +366,84 @@ describe('kanbanStore', () => {
 
     it('does nothing when there is no board', () => {
       expect(() => useKanbanStore.getState().deleteTask('col-1', 'task-1')).not.toThrow();
+    });
+  });
+
+  describe('toggleTaskSelection / clearSelection', () => {
+    it('adds a task to the selection when toggled on', () => {
+      useKanbanStore.getState().toggleTaskSelection('task-1');
+      expect(useKanbanStore.getState().selectedTaskIds.has('task-1')).toBe(true);
+    });
+
+    it('removes a task from the selection when toggled again', () => {
+      useKanbanStore.getState().toggleTaskSelection('task-1');
+      useKanbanStore.getState().toggleTaskSelection('task-1');
+      expect(useKanbanStore.getState().selectedTaskIds.has('task-1')).toBe(false);
+    });
+
+    it('tracks multiple selected tasks independently', () => {
+      useKanbanStore.getState().toggleTaskSelection('task-1');
+      useKanbanStore.getState().toggleTaskSelection('task-3');
+      expect(useKanbanStore.getState().selectedTaskIds).toEqual(new Set(['task-1', 'task-3']));
+    });
+
+    it('clearSelection empties the selection', () => {
+      useKanbanStore.getState().toggleTaskSelection('task-1');
+      useKanbanStore.getState().toggleTaskSelection('task-2');
+      useKanbanStore.getState().clearSelection();
+      expect(useKanbanStore.getState().selectedTaskIds.size).toBe(0);
+    });
+  });
+
+  describe('moveSelectedTasks', () => {
+    it('moves several selected tasks from different columns into the target column, in original order', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().moveSelectedTasks(['task-2', 'task-3'], 'col-1', 1);
+
+      const columns = useKanbanStore.getState().board?.columns;
+      expect(columns?.[0].tasks.map(t => t.id)).toEqual(['task-1', 'task-2', 'task-3']);
+      expect(columns?.[1].tasks).toHaveLength(0);
+    });
+
+    it('clears the selection after moving', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+      useKanbanStore.getState().toggleTaskSelection('task-1');
+      useKanbanStore.getState().toggleTaskSelection('task-3');
+
+      useKanbanStore.getState().moveSelectedTasks(['task-1', 'task-3'], 'col-2', 0);
+
+      expect(useKanbanStore.getState().selectedTaskIds.size).toBe(0);
+    });
+
+    it('reorders a selected group within the same column', () => {
+      const board = createMockBoard();
+      board.columns[0].tasks.push({ id: 'task-4', title: 'Task 4' });
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().moveSelectedTasks(['task-1', 'task-4'], 'col-1', 1);
+
+      const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+      expect(tasks?.map(t => t.id)).toEqual(['task-2', 'task-1', 'task-4']);
+    });
+
+    it('does nothing when none of the given ids exist', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().moveSelectedTasks(['missing-1', 'missing-2'], 'col-1', 0);
+
+      const columns = useKanbanStore.getState().board?.columns;
+      expect(columns?.[0].tasks.map(t => t.id)).toEqual(['task-1', 'task-2']);
+      expect(columns?.[1].tasks.map(t => t.id)).toEqual(['task-3']);
+    });
+
+    it('does nothing when there is no board', () => {
+      expect(() =>
+        useKanbanStore.getState().moveSelectedTasks(['task-1'], 'col-1', 0)
+      ).not.toThrow();
     });
   });
 

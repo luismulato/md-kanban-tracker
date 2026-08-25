@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { KanbanTask } from '../../types/kanban';
 import { TaskCard } from './TaskCard';
 import { TaskContextMenu } from './TaskContextMenu';
-import { useKanbanStore } from '../../stores/kanbanStore';
+import { useKanbanStore, useIsTaskSelected } from '../../stores/kanbanStore';
 
 interface SortableTaskProps {
   task: KanbanTask;
@@ -16,6 +16,8 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
   const openModal = useKanbanStore((s) => s.openModal);
   const moveTaskToTop = useKanbanStore((s) => s.moveTaskToTop);
   const deleteTask = useKanbanStore((s) => s.deleteTask);
+  const toggleTaskSelection = useKanbanStore((s) => s.toggleTaskSelection);
+  const isSelected = useIsTaskSelected(task.id);
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   const {
@@ -39,9 +41,14 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
     zIndex: isDragging ? 1 : 0,
   };
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
     // don't open modal if dragging
     if (isDragging) return;
+    // Cmd/Ctrl+click toggles selection instead of opening the card
+    if (e.metaKey || e.ctrlKey) {
+      toggleTaskSelection(task.id);
+      return;
+    }
     openModal(task.id);
   };
 
@@ -68,7 +75,7 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
         onContextMenu={handleContextMenu}
         className="cursor-grab active:cursor-grabbing"
       >
-        <TaskCard task={task} isDragging={isDragging} onUpdateTask={onUpdateTask} />
+        <TaskCard task={task} isDragging={isDragging} isSelected={isSelected} onUpdateTask={onUpdateTask} />
       </div>
 
       {contextMenuPos && (

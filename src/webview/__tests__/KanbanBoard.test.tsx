@@ -30,6 +30,7 @@ describe('KanbanBoard', () => {
       isDragging: false,
       dragPreview: null,
       openTaskId: null,
+      selectedTaskIds: new Set(),
       _fingerprint: '',
     });
   });
@@ -170,6 +171,37 @@ describe('KanbanBoard', () => {
 
       const state = useKanbanStore.getState();
       expect(state.board?.columns[0].tasks[2].id).toBe('task-1-1');
+    });
+  });
+
+  describe('Multi-select', () => {
+    it('shows a selection count in the header once tasks are selected', async () => {
+      setupStore();
+      render(<KanbanBoard />);
+
+      expect(screen.queryByText(/selected/)).not.toBeInTheDocument();
+
+      await act(async () => {
+        useKanbanStore.getState().toggleTaskSelection('task-1-1');
+        useKanbanStore.getState().toggleTaskSelection('task-2-1');
+      });
+
+      expect(screen.getByText(/2 selected/)).toBeInTheDocument();
+    });
+
+    it('moves every selected task into the target column via the store', async () => {
+      setupStore();
+      render(<KanbanBoard />);
+
+      await act(async () => {
+        useKanbanStore.getState().moveSelectedTasks(['task-1-1', 'task-2-1'], 'column-3', 0);
+      });
+
+      const state = useKanbanStore.getState();
+      const columnThreeIds = state.board?.columns[2].tasks.map(t => t.id);
+      expect(columnThreeIds).toContain('task-1-1');
+      expect(columnThreeIds).toContain('task-2-1');
+      expect(state.selectedTaskIds.size).toBe(0);
     });
   });
 

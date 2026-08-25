@@ -122,6 +122,22 @@ describe('TaskCard', () => {
     });
   });
 
+  describe('Selection highlight', () => {
+    it('applies a selection ring when isSelected is true', () => {
+      const task: KanbanTask = { id: '1', title: 'Test Task' };
+      const { container } = render(<TaskCard task={task} isSelected />);
+      const card = container.firstChild as HTMLElement;
+      expect(card.className).toContain('ring-2');
+    });
+
+    it('renders no selection ring by default', () => {
+      const task: KanbanTask = { id: '1', title: 'Test Task' };
+      const { container } = render(<TaskCard task={task} />);
+      const card = container.firstChild as HTMLElement;
+      expect(card.className).not.toContain('ring-2');
+    });
+  });
+
   describe('Tags display', () => {
     it('renders tags as badges', () => {
       const task: KanbanTask = {

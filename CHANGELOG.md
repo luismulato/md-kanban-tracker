@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 
+- **Multi-select cards and move them together**: Cmd/Ctrl+click a card to toggle it into a selection instead of opening it (a plain click still opens the card as before). With two or more cards selected, dragging any one of them moves the whole group into the target column, in their original relative order. The header shows a live "N selected" hint while Esc clears the selection.
 - **Delete a card from the board**: right-click a card and choose "Delete card" to remove it, with a confirmation prompt since it can't be undone. The extension backend already supported a `deleteTask` message; this wires up the missing frontend trigger.
 - **Task type**: cards can now carry a `type` (`epic`, `story`, `task`, `spike`), set via the `- type: <value>` property in markdown. Shown as a badge on the card when set.
 - **Click-to-cycle task type**: clicking a card's type badge cycles it through `epic -> story -> task -> spike -> (unset)`, same interaction as the priority/workload badges in the task modal.

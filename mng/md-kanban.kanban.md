@@ -15,15 +15,6 @@
 
 ## To Do
 
-### Multi-select cards with Cmd+Click and move them to another column
-
-    ```md
-    A plain click keeps opening the card (current behavior). Cmd+Click
-    instead toggles selection mode, selecting/deselecting the card
-    without opening it. With two or more cards selected, dragging any
-    one of them moves the whole selection to the target column.
-    ```
-
 ### Multi-select cards with Cmd+Click and delete them via right-click
 
     ```md
@@ -42,6 +33,15 @@
 ## WIP
 
 ## Done
+
+### Multi-select cards with Cmd+Click and move them to another column
+
+    ```md
+    A plain click keeps opening the card (current behavior). Cmd+Click
+    instead toggles selection mode, selecting/deselecting the card
+    without opening it. With two or more cards selected, dragging any
+    one of them moves the whole selection to the target column.
+    ```
 
 ### Borrar una tarjeta desde la vista de kanban
 
