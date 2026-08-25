@@ -15,6 +15,24 @@
 
 ## To Do
 
+### Multi-select cards with Cmd+Click and move them to another column
+
+    ```md
+    A plain click keeps opening the card (current behavior). Cmd+Click
+    instead toggles selection mode, selecting/deselecting the card
+    without opening it. With two or more cards selected, dragging any
+    one of them moves the whole selection to the target column.
+    ```
+
+### Multi-select cards with Cmd+Click and delete them via right-click
+
+    ```md
+    Same selection mechanic as the previous card (Cmd+Click to select,
+    plain click still opens a card). With one or more cards selected,
+    right-click shows a "Delete cards" option that removes all of them
+    at once, with the same confirmation prompt as deleting a single card.
+    ```
+
 ### Agregar timer automático al pasar al WIP, al lado derecho del titulo principal con el tiempo transcurrido y un botón de pausa/restart y otro de reset
 
 
