@@ -2,6 +2,7 @@ import { memo } from 'react';
 import type { KanbanTask } from '../../types/kanban';
 import { Badge } from '../atoms/Badge';
 import { TASK_TYPE_LABELS, TASK_TYPE_BADGE_VARIANT, nextTaskType } from '../../utils/taskType';
+import { TaskTimer } from './TaskTimer';
 
 interface TaskCardProps {
   task: KanbanTask;
@@ -50,7 +51,10 @@ function TaskCardComponent({ task, isDragging = false, isOverlay = false, isSele
           {TASK_TYPE_LABELS[task.type]}
         </Badge>
       )}
-      <h3 className="font-medium text-vscode-foreground">{task.title}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="font-medium text-vscode-foreground">{task.title}</h3>
+        {!isOverlay && <TaskTimer taskId={task.id} title={task.title} />}
+      </div>
 
       {task.tags && task.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">

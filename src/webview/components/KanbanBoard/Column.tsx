@@ -4,6 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { KanbanColumn, KanbanTask } from '../../types/kanban';
 import { SortableTask } from './SortableTask';
 import { useKanbanStore } from '../../stores/kanbanStore';
+import { WIP_COLUMN } from '../../../automation/constants';
 
 interface ColumnProps {
   column: KanbanColumn;
@@ -13,6 +14,9 @@ interface ColumnProps {
 function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
   const [isHovered, setIsHovered] = useState(false);
   const openModalForNewTask = useKanbanStore((s) => s.openModalForNewTask);
+  const pauseAllWipTimers = useKanbanStore((s) => s.pauseAllWipTimers);
+  const resumeAllWipTimers = useKanbanStore((s) => s.resumeAllWipTimers);
+  const isWipColumn = column.title === WIP_COLUMN;
 
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -56,9 +60,29 @@ function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
             <span className="ml-2 text-xs opacity-60">[Archived]</span>
           )}
         </h2>
-        <span className="text-sm text-vscode-foreground opacity-60">
-          {column.tasks.length}
-        </span>
+        <div className="flex items-center gap-2">
+          {isWipColumn && column.tasks.length > 0 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={pauseAllWipTimers}
+                aria-label="Pause all timers"
+                className="text-xs text-vscode-foreground opacity-60 hover:opacity-100"
+              >
+                Pause all
+              </button>
+              <button
+                onClick={resumeAllWipTimers}
+                aria-label="Resume all timers"
+                className="text-xs text-vscode-foreground opacity-60 hover:opacity-100"
+              >
+                Resume all
+              </button>
+            </div>
+          )}
+          <span className="text-sm text-vscode-foreground opacity-60">
+            {column.tasks.length}
+          </span>
+        </div>
       </div>
 
       <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>

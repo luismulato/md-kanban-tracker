@@ -5,5 +5,8 @@ export const DONE_DONE_COLUMN = 'Done Done';
 
 export const COMPANION_DIR_NAME = 'md-kanban-tracker';
 
+/** Owner assumed for a WIP task with no explicit `- owner:` property. */
+export const DEFAULT_OWNER = 'Luis';
+
 export const TIMER_STATE_FILE = '.timelog-state';
 export const LAST_ARCHIVE_FILE = '.timelog-last-archive';

@@ -6,6 +6,7 @@ export interface KanbanTask {
   description?: string;
   tags?: string[];
   type?: TaskType;
+  owner?: string;
   priority?: 'low' | 'medium' | 'high';
   workload?: 'Easy' | 'Normal' | 'Hard' | 'Extreme';
   dueDate?: string;

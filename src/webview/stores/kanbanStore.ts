@@ -3,6 +3,28 @@ import { shallow } from 'zustand/shallow';
 import { arrayMove } from '@dnd-kit/sortable';
 import type { KanbanBoard, KanbanColumn, KanbanTask } from '../types/kanban';
 import { getVSCodeAPI } from '../hooks/useVSCodeApi';
+import { WIP_COLUMN } from '../../automation/constants';
+
+/** A WIP card's timer: ticking since `startedAt`, or paused (frozen, already logged). */
+export type TaskTimerState = { status: 'running'; startedAt: number } | { status: 'paused' };
+
+/**
+ * Keeps `taskTimers` in sync with which tasks are currently sitting in the
+ * WIP column of `board`. A task that just entered WIP gets a fresh running
+ * timer; a task already tracked keeps its existing state untouched; a task
+ * that left WIP (or was deleted) has its timer dropped — it stops
+ * immediately, per the "timer only shows while in WIP" rule.
+ */
+function syncTimersWithWip(board: KanbanBoard, timers: Record<string, TaskTimerState>): Record<string, TaskTimerState> {
+  const wipColumn = board.columns.find(col => col.title === WIP_COLUMN);
+  const wipTaskIds = wipColumn ? wipColumn.tasks.map(t => t.id) : [];
+
+  const next: Record<string, TaskTimerState> = {};
+  for (const id of wipTaskIds) {
+    next[id] = timers[id] ?? { status: 'running', startedAt: Date.now() };
+  }
+  return next;
+}
 
 /**
  * Creates a fingerprint of the board structure for content comparison.
@@ -24,6 +46,7 @@ interface KanbanState {
   openTaskId: string | null;
   newTaskColumnId: string | null;
   selectedTaskIds: Set<string>;
+  taskTimers: Record<string, TaskTimerState>;
 
   // internal
   _fingerprint: string;
@@ -46,6 +69,13 @@ interface KanbanState {
   toggleTaskSelection: (taskId: string) => void;
   clearSelection: () => void;
 
+  // WIP timer operations
+  pauseTaskTimer: (taskId: string, title: string) => void;
+  resumeTaskTimer: (taskId: string, title: string) => void;
+  resetTaskTimer: (taskId: string, title: string) => void;
+  pauseAllWipTimers: () => void;
+  resumeAllWipTimers: () => void;
+
   // drag operations
   startDrag: (taskId: string) => void;
   updateDragPreview: (columns: KanbanColumn[]) => void;
@@ -67,15 +97,17 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
   openTaskId: null,
   newTaskColumnId: null,
   selectedTaskIds: new Set(),
+  taskTimers: {},
   _fingerprint: '',
 
   setBoard: (board) => {
     const fingerprint = getBoardFingerprint(board);
-    set({
+    set((state) => ({
       board,
       isLoading: false,
       _fingerprint: fingerprint,
-    });
+      taskTimers: syncTimersWithWip(board, state.taskTimers),
+    }));
   },
 
   syncFromBackend: (newBoard) => {
@@ -92,6 +124,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
       board: newBoard,
       isLoading: false,
       _fingerprint: newFingerprint,
+      taskTimers: syncTimersWithWip(newBoard, state.taskTimers),
     });
   },
 
@@ -155,6 +188,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     set({
       board: newBoard,
       _fingerprint: newFingerprint,
+      taskTimers: syncTimersWithWip(newBoard, state.taskTimers),
     });
 
     // post message to extension
@@ -205,6 +239,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     set({
       board: newBoard,
       _fingerprint: newFingerprint,
+      taskTimers: syncTimersWithWip(newBoard, state.taskTimers),
     });
 
     // post message to extension
@@ -302,6 +337,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     set({
       board: newBoard,
       _fingerprint: newFingerprint,
+      taskTimers: syncTimersWithWip(newBoard, state.taskTimers),
       // closing the modal if it was showing the task we just deleted
       openTaskId: state.openTaskId === taskId ? null : state.openTaskId,
     });
@@ -346,6 +382,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     set({
       board: newBoard,
       _fingerprint: newFingerprint,
+      taskTimers: syncTimersWithWip(newBoard, state.taskTimers),
       selectedTaskIds: new Set(),
       // closing the modal if it was showing one of the deleted tasks
       openTaskId: state.openTaskId && removingIds.has(state.openTaskId) ? null : state.openTaskId,
@@ -402,6 +439,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     set({
       board: newBoard,
       _fingerprint: newFingerprint,
+      taskTimers: syncTimersWithWip(newBoard, state.taskTimers),
       selectedTaskIds: new Set(),
     });
 
@@ -435,6 +473,63 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
   },
 
   clearSelection: () => set({ selectedTaskIds: new Set() }),
+
+  pauseTaskTimer: (taskId, title) => {
+    set((state) => ({
+      taskTimers: { ...state.taskTimers, [taskId]: { status: 'paused' } },
+    }));
+    try {
+      getVSCodeAPI().postMessage({ type: 'pauseTimer', taskId, title });
+    } catch {
+      // ignore in test environment
+    }
+  },
+
+  resumeTaskTimer: (taskId, title) => {
+    set((state) => ({
+      taskTimers: { ...state.taskTimers, [taskId]: { status: 'running', startedAt: Date.now() } },
+    }));
+    try {
+      getVSCodeAPI().postMessage({ type: 'resumeTimer', taskId, title });
+    } catch {
+      // ignore in test environment
+    }
+  },
+
+  resetTaskTimer: (taskId, title) => {
+    set((state) => ({
+      taskTimers: { ...state.taskTimers, [taskId]: { status: 'running', startedAt: Date.now() } },
+    }));
+    try {
+      getVSCodeAPI().postMessage({ type: 'resetTimer', taskId, title });
+    } catch {
+      // ignore in test environment
+    }
+  },
+
+  pauseAllWipTimers: () => {
+    const state = get();
+    const wipColumn = state.board?.columns.find(col => col.title === WIP_COLUMN);
+    if (!wipColumn) return;
+
+    for (const task of wipColumn.tasks) {
+      if (state.taskTimers[task.id]?.status === 'running') {
+        get().pauseTaskTimer(task.id, task.title);
+      }
+    }
+  },
+
+  resumeAllWipTimers: () => {
+    const state = get();
+    const wipColumn = state.board?.columns.find(col => col.title === WIP_COLUMN);
+    if (!wipColumn) return;
+
+    for (const task of wipColumn.tasks) {
+      if (state.taskTimers[task.id]?.status === 'paused') {
+        get().resumeTaskTimer(task.id, task.title);
+      }
+    }
+  },
 
   startDrag: (taskId) => {
     const state = get();
@@ -518,6 +613,7 @@ export const useModalTask = () =>
 export const useIsTaskSelected = (taskId: string) =>
   useKanbanStore((state) => state.selectedTaskIds.has(taskId));
 export const useSelectedTaskCount = () => useKanbanStore((state) => state.selectedTaskIds.size);
+export const useTaskTimer = (taskId: string) => useKanbanStore((state) => state.taskTimers[taskId]);
 export const useIsDragging = () => useKanbanStore((state) => state.isDragging);
 export const useIsModalOpen = () => useKanbanStore((state) => state.openTaskId !== null || state.newTaskColumnId !== null);
 export const useIsLoading = () => useKanbanStore((state) => state.isLoading);

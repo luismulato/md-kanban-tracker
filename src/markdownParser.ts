@@ -6,6 +6,7 @@ export interface KanbanTask {
   description?: string;
   tags?: string[];
   type?: TaskType;
+  owner?: string;
   priority?: 'low' | 'medium' | 'high';
   workload?: 'Easy' | 'Normal' | 'Hard' | 'Extreme';
   dueDate?: string;
@@ -191,7 +192,7 @@ export class MarkdownKanbanParser {
 
   private static isTaskTitle(line: string, trimmedLine: string): boolean {
     // Exclude property lines (any indented line with property pattern)
-    if (trimmedLine.match(/^- (due|tags|type|priority|workload|steps|defaultExpanded):/)) {
+    if (trimmedLine.match(/^- (due|tags|type|owner|priority|workload|steps|defaultExpanded):/)) {
       return false;
     }
 
@@ -231,7 +232,7 @@ export class MarkdownKanbanParser {
 
   private static parseTaskProperty(line: string, task: KanbanTask): boolean {
     // flexible regex: accept any amount of leading whitespace (0+) to support formatted markdown
-    const propertyMatch = line.match(/^\s*- (due|tags|type|priority|workload|steps|defaultExpanded):\s*(.*)$/);
+    const propertyMatch = line.match(/^\s*- (due|tags|type|owner|priority|workload|steps|defaultExpanded):\s*(.*)$/);
     if (!propertyMatch) return false;
 
     const [, propertyName, propertyValue] = propertyMatch;
@@ -245,6 +246,9 @@ export class MarkdownKanbanParser {
         if (['epic', 'story', 'task', 'spike'].includes(value)) {
           task.type = value as TaskType;
         }
+        break;
+      case 'owner':
+        task.owner = value;
         break;
       case 'tags':
         const tagsMatch = value.match(/\[(.*)\]/);
@@ -346,6 +350,9 @@ export class MarkdownKanbanParser {
     // generate without indentation for formatter compatibility
     if (task.type) {
       properties += `- type: ${task.type}\n`;
+    }
+    if (task.owner) {
+      properties += `- owner: ${task.owner}\n`;
     }
     if (task.tags && task.tags.length > 0) {
       properties += `- tags: [${task.tags.join(', ')}]\n`;

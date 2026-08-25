@@ -43,6 +43,7 @@ describe('kanbanStore', () => {
       openTaskId: null,
       newTaskColumnId: null,
       selectedTaskIds: new Set(),
+      taskTimers: {},
     });
   });
 
@@ -559,6 +560,155 @@ describe('kanbanStore', () => {
       const state = useKanbanStore.getState();
       expect(state.board?.columns[0].tasks.length).toBe(2);
       expect(state.board?.columns[1].tasks.length).toBe(1);
+    });
+  });
+
+  describe('WIP timers', () => {
+    const createBoardWithWip = (): KanbanBoard => ({
+      title: 'Test Board',
+      columns: [
+        { id: 'col-todo', title: 'To Do', tasks: [{ id: 'task-1', title: 'Task 1' }] },
+        { id: 'col-wip', title: 'WIP', tasks: [] },
+        { id: 'col-done', title: 'Done', tasks: [] },
+      ],
+    });
+
+    describe('automatic sync with WIP membership', () => {
+      it('starts a running timer for a task that is already in WIP on setBoard', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [{ id: 'task-wip', title: 'In progress' }];
+
+        useKanbanStore.getState().setBoard(board);
+
+        const timer = useKanbanStore.getState().taskTimers['task-wip'];
+        expect(timer).toEqual({ status: 'running', startedAt: expect.any(Number) });
+      });
+
+      it('does not create a timer for tasks outside WIP', () => {
+        const board = createBoardWithWip();
+        useKanbanStore.getState().setBoard(board);
+
+        expect(useKanbanStore.getState().taskTimers['task-1']).toBeUndefined();
+      });
+
+      it('starts a timer when a task moves into WIP', () => {
+        const board = createBoardWithWip();
+        useKanbanStore.getState().setBoard(board);
+
+        useKanbanStore.getState().moveTask('task-1', 'col-todo', 'col-wip', 0);
+
+        expect(useKanbanStore.getState().taskTimers['task-1']?.status).toBe('running');
+      });
+
+      it('drops the timer immediately when a task leaves WIP', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [{ id: 'task-wip', title: 'In progress' }];
+        useKanbanStore.getState().setBoard(board);
+        expect(useKanbanStore.getState().taskTimers['task-wip']).toBeDefined();
+
+        useKanbanStore.getState().moveTask('task-wip', 'col-wip', 'col-done', 0);
+
+        expect(useKanbanStore.getState().taskTimers['task-wip']).toBeUndefined();
+      });
+
+      it('drops the timer when a WIP task is deleted', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [{ id: 'task-wip', title: 'In progress' }];
+        useKanbanStore.getState().setBoard(board);
+
+        useKanbanStore.getState().deleteTask('col-wip', 'task-wip');
+
+        expect(useKanbanStore.getState().taskTimers['task-wip']).toBeUndefined();
+      });
+
+      it('preserves an already-tracked timer state instead of resetting it on re-sync', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [{ id: 'task-wip', title: 'In progress' }];
+        useKanbanStore.getState().setBoard(board);
+        useKanbanStore.getState().pauseTaskTimer('task-wip', 'In progress');
+
+        // an unrelated board update (e.g. from the backend) shouldn't touch it
+        useKanbanStore.getState().moveTask('task-1', 'col-todo', 'col-done', 0);
+
+        expect(useKanbanStore.getState().taskTimers['task-wip']).toEqual({ status: 'paused' });
+      });
+    });
+
+    describe('pauseTaskTimer / resumeTaskTimer / resetTaskTimer', () => {
+      it('pauses a running timer', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [{ id: 'task-wip', title: 'In progress' }];
+        useKanbanStore.getState().setBoard(board);
+
+        useKanbanStore.getState().pauseTaskTimer('task-wip', 'In progress');
+
+        expect(useKanbanStore.getState().taskTimers['task-wip']).toEqual({ status: 'paused' });
+      });
+
+      it('resumes a paused timer with a fresh start time', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [{ id: 'task-wip', title: 'In progress' }];
+        useKanbanStore.getState().setBoard(board);
+        useKanbanStore.getState().pauseTaskTimer('task-wip', 'In progress');
+
+        useKanbanStore.getState().resumeTaskTimer('task-wip', 'In progress');
+
+        expect(useKanbanStore.getState().taskTimers['task-wip']).toEqual({
+          status: 'running',
+          startedAt: expect.any(Number),
+        });
+      });
+
+      it('reset always leaves the timer running with a fresh start time', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [{ id: 'task-wip', title: 'In progress' }];
+        useKanbanStore.getState().setBoard(board);
+
+        useKanbanStore.getState().resetTaskTimer('task-wip', 'In progress');
+
+        expect(useKanbanStore.getState().taskTimers['task-wip']).toEqual({
+          status: 'running',
+          startedAt: expect.any(Number),
+        });
+      });
+    });
+
+    describe('pauseAllWipTimers / resumeAllWipTimers', () => {
+      it('pauses every running WIP timer, leaving already-paused ones alone', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [
+          { id: 'task-a', title: 'A' },
+          { id: 'task-b', title: 'B' },
+        ];
+        useKanbanStore.getState().setBoard(board);
+        useKanbanStore.getState().pauseTaskTimer('task-b', 'B');
+
+        useKanbanStore.getState().pauseAllWipTimers();
+
+        expect(useKanbanStore.getState().taskTimers['task-a']).toEqual({ status: 'paused' });
+        expect(useKanbanStore.getState().taskTimers['task-b']).toEqual({ status: 'paused' });
+      });
+
+      it('resumes every paused WIP timer, leaving already-running ones alone', () => {
+        const board = createBoardWithWip();
+        board.columns.find((c) => c.id === 'col-wip')!.tasks = [
+          { id: 'task-a', title: 'A' },
+          { id: 'task-b', title: 'B' },
+        ];
+        useKanbanStore.getState().setBoard(board);
+        useKanbanStore.getState().pauseTaskTimer('task-a', 'A');
+
+        useKanbanStore.getState().resumeAllWipTimers();
+
+        expect(useKanbanStore.getState().taskTimers['task-a']?.status).toBe('running');
+        expect(useKanbanStore.getState().taskTimers['task-b']?.status).toBe('running');
+      });
+
+      it('does nothing when there is no WIP column', () => {
+        useKanbanStore.setState({ board: null });
+        expect(() => useKanbanStore.getState().pauseAllWipTimers()).not.toThrow();
+        expect(() => useKanbanStore.getState().resumeAllWipTimers()).not.toThrow();
+      });
     });
   });
 

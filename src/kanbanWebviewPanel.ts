@@ -2,9 +2,10 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { MarkdownKanbanParser, KanbanBoard, KanbanTask, KanbanColumn } from './markdownParser';
-import { currentWipTitle } from './automation/boardRules';
+import { currentWipTitles } from './automation/boardRules';
 import { ensureCompanionFolder } from './automation/companionFiles';
 import { applyBoardAutomation, ApplyBoardAutomationResult } from './automation/boardAutomation';
+import { startTimer, stopTimer } from './automation/timelog';
 
 /**
  * Creates a fingerprint of the board structure for content comparison.
@@ -56,7 +57,7 @@ export class KanbanWebviewPanel {
     // singleton and only ever shows one board at a time.
     private _companionDir?: string;
     private _boardBaseName?: string;
-    private _previousWipTitle: string | null = null;
+    private _previousWipTitles: string[] = [];
     private _ensuredCompanionForPath?: string;
 
     public static createOrShow(extensionUri: vscode.Uri, context: vscode.ExtensionContext, document?: vscode.TextDocument) {
@@ -174,7 +175,41 @@ export class KanbanWebviewPanel {
             case 'modalStateChange':
                 this._handleModalStateChange(message.isOpen);
                 break;
+            case 'pauseTimer':
+                this._pauseTimer(message.title);
+                break;
+            case 'resumeTimer':
+                this._resumeTimer(message.title);
+                break;
+            case 'resetTimer':
+                this._resetTimer(message.title);
+                break;
         }
+    }
+
+    /**
+     * Manual pause/resume/reset for a task's WIP timer, triggered from the
+     * webview's per-card or per-column timer controls. These only touch the
+     * companion timer state/timelog files (never `this._board`/the .md
+     * document), so there's nothing to save through performAction() here —
+     * the automatic start/stop tied to WIP membership itself still runs
+     * through applyBoardAutomation() as usual.
+     */
+    private _pauseTimer(title: string) {
+        if (!this._companionDir || !this._boardBaseName) {return;}
+        stopTimer(this._companionDir, this._boardBaseName, title, 'manual pause', new Date());
+    }
+
+    private _resumeTimer(title: string) {
+        if (!this._companionDir) {return;}
+        startTimer(this._companionDir, title, new Date());
+    }
+
+    private _resetTimer(title: string) {
+        if (!this._companionDir || !this._boardBaseName) {return;}
+        const now = new Date();
+        stopTimer(this._companionDir, this._boardBaseName, title, 'manual reset', now);
+        startTimer(this._companionDir, title, now);
     }
 
     /**
@@ -264,7 +299,7 @@ export class KanbanWebviewPanel {
             // another board): baseline on whatever's in WIP right now, so
             // just opening/switching to it isn't itself treated as "a task
             // just entered WIP".
-            this._previousWipTitle = currentWipTitle(this._board);
+            this._previousWipTitles = currentWipTitles(this._board);
         }
         if (!this._companionDir || !this._boardBaseName) {return null;}
 
@@ -272,10 +307,10 @@ export class KanbanWebviewPanel {
             board: this._board,
             companionDir: this._companionDir,
             boardBaseName: this._boardBaseName,
-            previousWipTitle: this._previousWipTitle,
+            previousWipTitles: this._previousWipTitles,
             justMovedTitle,
         });
-        this._previousWipTitle = result.newWipTitle;
+        this._previousWipTitles = result.newWipTitles;
         return result;
     }
 

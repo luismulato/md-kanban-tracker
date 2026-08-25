@@ -41,44 +41,75 @@ function timelogFilePath(companionDir: string, boardBaseName: string): string {
   return path.join(companionDir, `${boardBaseName}.timelog.md`);
 }
 
-/** Title of the task the manual timer is currently running for, or null. */
-export function readRunningTimerTask(companionDir: string): string | null {
-  const file = stateFilePath(companionDir);
-  if (!fs.existsSync(file)) {
-    return null;
-  }
-  const content = fs.readFileSync(file, 'utf-8').trim();
-  const sep = content.indexOf('|');
-  if (sep === -1) {
-    return null;
-  }
-  return content.slice(sep + 1);
-}
-
-export function startTimer(companionDir: string, task: string, now: Date): void {
-  fs.mkdirSync(companionDir, { recursive: true });
-  fs.writeFileSync(stateFilePath(companionDir), `${Math.floor(now.getTime() / 1000)}|${task}`, 'utf-8');
+interface RunningTimer {
+  title: string;
+  startEpoch: number;
 }
 
 /**
- * Stops the running timer (if any) and appends a line to the board's
- * timelog file. Format matches mng/scripts/timelog.sh exactly:
- * `YYYY-MM-DD HH:MM–HH:MM (Nm) — "Tarea" (razon)` (en dash / em dash, not hyphens).
+ * State file holds one `epoch|title` line per task currently being timed,
+ * so several WIP occupants (one per owner) can each have their own running
+ * timer at once. Still reads a legacy single-line file with no trailing
+ * newline just fine — that's just one entry.
  */
-export function stopTimer(companionDir: string, boardBaseName: string, reason: string, now: Date): void {
+function readRunningTimers(companionDir: string): RunningTimer[] {
   const file = stateFilePath(companionDir);
   if (!fs.existsSync(file)) {
+    return [];
+  }
+  return fs
+    .readFileSync(file, 'utf-8')
+    .split('\n')
+    .map((line: string) => line.trim())
+    .filter(Boolean)
+    .flatMap((line: string) => {
+      const sep = line.indexOf('|');
+      if (sep === -1) return [];
+      return [{ startEpoch: Number(line.slice(0, sep)), title: line.slice(sep + 1) }];
+    });
+}
+
+function writeRunningTimers(companionDir: string, timers: RunningTimer[]): void {
+  if (timers.length === 0) {
+    fs.rmSync(stateFilePath(companionDir), { force: true });
     return;
   }
-  const content = fs.readFileSync(file, 'utf-8').trim();
-  const sep = content.indexOf('|');
-  if (sep === -1) {
-    fs.rmSync(file, { force: true });
+  fs.mkdirSync(companionDir, { recursive: true });
+  const content = timers.map((t) => `${t.startEpoch}|${t.title}`).join('\n') + '\n';
+  fs.writeFileSync(stateFilePath(companionDir), content, 'utf-8');
+}
+
+/** Titles of every task with a timer currently running. */
+export function readRunningTimerTasks(companionDir: string): string[] {
+  return readRunningTimers(companionDir).map((t) => t.title);
+}
+
+/** Title of a single running timer, or null — kept for ad-hoc/manual use outside WIP automation. */
+export function readRunningTimerTask(companionDir: string): string | null {
+  const timers = readRunningTimers(companionDir);
+  return timers.length > 0 ? timers[0].title : null;
+}
+
+export function startTimer(companionDir: string, title: string, now: Date): void {
+  const timers = readRunningTimers(companionDir).filter((t) => t.title !== title);
+  timers.push({ title, startEpoch: Math.floor(now.getTime() / 1000) });
+  writeRunningTimers(companionDir, timers);
+}
+
+/**
+ * Stops the timer running for `title` (if any) and appends a line to the
+ * board's timelog file. Format matches mng/scripts/timelog.sh exactly:
+ * `YYYY-MM-DD HH:MM–HH:MM (Nm) — "Tarea" (razon)` (en dash / em dash, not hyphens).
+ * No-op if `title` has no running timer.
+ */
+export function stopTimer(companionDir: string, boardBaseName: string, title: string, reason: string, now: Date): void {
+  const timers = readRunningTimers(companionDir);
+  const index = timers.findIndex((t) => t.title === title);
+  if (index === -1) {
     return;
   }
-  const startEpoch = Number(content.slice(0, sep));
-  const task = content.slice(sep + 1);
-  const startDate = new Date(startEpoch * 1000);
+  const [timer] = timers.splice(index, 1);
+  const startDate = new Date(timer.startEpoch * 1000);
   const minutes = Math.round((now.getTime() - startDate.getTime()) / 60000);
 
   const logFile = timelogFilePath(companionDir, boardBaseName);
@@ -86,9 +117,9 @@ export function stopTimer(companionDir: string, boardBaseName: string, reason: s
   if (!fs.existsSync(logFile)) {
     fs.writeFileSync(logFile, `# ${boardBaseName} Timelog\n\n`, 'utf-8');
   }
-  const line = `${formatLocalDateTime(startDate)}–${formatLocalTime(now)} (${minutes}m) — "${task}" (${reason})\n`;
+  const line = `${formatLocalDateTime(startDate)}–${formatLocalTime(now)} (${minutes}m) — "${title}" (${reason})\n`;
   fs.appendFileSync(logFile, line, 'utf-8');
-  fs.rmSync(file, { force: true });
+  writeRunningTimers(companionDir, timers);
 }
 
 export function readLastArchiveDate(companionDir: string): string | null {

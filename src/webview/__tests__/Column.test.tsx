@@ -130,3 +130,79 @@ describe('Quick add a note by clicking an empty column area', () => {
     expect(state.board!.columns.find(c => c.id === 'column-1')!.tasks.length).toBe(before);
   });
 });
+
+describe('WIP column timer controls', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useKanbanStore.setState({
+      board: null,
+      isLoading: true,
+      isDragging: false,
+      dragPreview: null,
+      openTaskId: null,
+      newTaskColumnId: null,
+      selectedTaskIds: new Set(),
+      taskTimers: {},
+      _fingerprint: '',
+    });
+  });
+
+  const setupBoardWithWip = (wipTasks: Array<{ id: string; title: string }>) => {
+    const board = {
+      title: 'Test Board',
+      columns: [
+        { id: 'col-todo', title: 'To Do', tasks: [] },
+        { id: 'col-wip', title: 'WIP', tasks: wipTasks },
+        { id: 'col-done', title: 'Done', tasks: [] },
+      ],
+    };
+    useKanbanStore.getState().setBoard(board);
+    return board;
+  };
+
+  it('shows pause/resume-all controls only once, on the WIP column', () => {
+    setupBoardWithWip([{ id: 'task-1', title: 'In progress' }]);
+    render(<KanbanBoard />);
+
+    // one board, three columns (To Do / WIP / Done) — only WIP gets the controls
+    expect(screen.getAllByLabelText('Pause all timers')).toHaveLength(1);
+    expect(screen.getAllByLabelText('Resume all timers')).toHaveLength(1);
+  });
+
+  it('does not show pause/resume-all controls when WIP is empty', () => {
+    setupBoardWithWip([]);
+    render(<KanbanBoard />);
+
+    expect(screen.queryByLabelText('Pause all timers')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Resume all timers')).not.toBeInTheDocument();
+  });
+
+  it('pausing all stops every running WIP timer', () => {
+    setupBoardWithWip([
+      { id: 'task-1', title: 'In progress 1' },
+      { id: 'task-2', title: 'In progress 2' },
+    ]);
+    render(<KanbanBoard />);
+
+    fireEvent.click(screen.getByLabelText('Pause all timers'));
+
+    const timers = useKanbanStore.getState().taskTimers;
+    expect(timers['task-1']).toEqual({ status: 'paused' });
+    expect(timers['task-2']).toEqual({ status: 'paused' });
+  });
+
+  it('resuming all restarts every paused WIP timer', () => {
+    setupBoardWithWip([
+      { id: 'task-1', title: 'In progress 1' },
+      { id: 'task-2', title: 'In progress 2' },
+    ]);
+    render(<KanbanBoard />);
+
+    fireEvent.click(screen.getByLabelText('Pause all timers'));
+    fireEvent.click(screen.getByLabelText('Resume all timers'));
+
+    const timers = useKanbanStore.getState().taskTimers;
+    expect(timers['task-1']?.status).toBe('running');
+    expect(timers['task-2']?.status).toBe('running');
+  });
+});

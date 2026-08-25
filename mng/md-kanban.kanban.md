@@ -15,15 +15,32 @@
 
 ## To Do
 
-### Agregar timer automático al pasar al WIP, al lado derecho del titulo principal con el tiempo transcurrido y un botón de pausa/restart y otro de reset
-
-
 ### Cuando edita una tarjeta y da enter debe cerrarla
 
 
 ## WIP
 
 ## Done
+
+### Agregar timer automático al pasar al WIP, con pausa/restart y reset por tarjeta y por columna
+
+    ```md
+    Fusiona la tarjeta original de To Do con la de Backlog que la
+    refinaba. Cada tarjeta en WIP tiene su propio timer (visible solo
+    mientras está en WIP, se detiene apenas sale). Pausa/reanudar y
+    reset a nivel de tarjeta; la columna WIP tiene "Pause all"/"Resume
+    all" para todas a la vez.
+
+    "Single WIP" ahora es por owner (- owner: <nombre> en el markdown,
+    sin owner = Luis por default), no por columna: Luis y uno o más
+    agentes de IA pueden tener cada uno su propia tarjeta en WIP al
+    mismo tiempo; una segunda tarjeta del mismo owner sigue empujando
+    la anterior de ese owner a To Do.
+
+    No se agregó UI para asignar el owner de una tarjeta (se setea a
+    mano en el markdown) — quedó fuera de alcance de esta historia.
+    ```
+
 
 ### Multi-select cards with Cmd+Click and delete them via right-click
 

@@ -171,6 +171,49 @@ describe('MarkdownKanbanParser', () => {
     });
   });
 
+  describe('parseMarkdown - Owner', () => {
+    it('parses an owner property', () => {
+      const markdown = `# Board
+
+## WIP
+
+### Owned by Luis
+  - owner: Luis
+
+### Owned by an agent
+  - owner: Claude
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      expect(board.columns[0].tasks[0].owner).toBe('Luis');
+      expect(board.columns[0].tasks[1].owner).toBe('Claude');
+    });
+
+    it('leaves owner undefined when not set', () => {
+      const markdown = `# Board
+
+## WIP
+
+### No owner
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      expect(board.columns[0].tasks[0].owner).toBeUndefined();
+    });
+
+    it('round-trips owner through generateMarkdown', () => {
+      const markdown = `# Board
+
+## WIP
+
+### Owned task
+  - owner: Claude
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      const regenerated = MarkdownKanbanParser.generateMarkdown(board);
+      const reparsed = MarkdownKanbanParser.parseMarkdown(regenerated);
+      expect(reparsed.columns[0].tasks[0].owner).toBe('Claude');
+    });
+  });
+
   describe('parseMarkdown - Tags', () => {
     it('parses inline hashtag tags', () => {
       const markdown = `# Board
