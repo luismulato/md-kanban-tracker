@@ -15,15 +15,6 @@
 
 ## To Do
 
-### Multi-select cards with Cmd+Click and delete them via right-click
-
-    ```md
-    Same selection mechanic as the previous card (Cmd+Click to select,
-    plain click still opens a card). With one or more cards selected,
-    right-click shows a "Delete cards" option that removes all of them
-    at once, with the same confirmation prompt as deleting a single card.
-    ```
-
 ### Agregar timer automático al pasar al WIP, al lado derecho del titulo principal con el tiempo transcurrido y un botón de pausa/restart y otro de reset
 
 
@@ -33,6 +24,15 @@
 ## WIP
 
 ## Done
+
+### Multi-select cards with Cmd+Click and delete them via right-click
+
+    ```md
+    Same selection mechanic as the previous card (Cmd+Click to select,
+    plain click still opens a card). With one or more cards selected,
+    right-click shows a "Delete cards" option that removes all of them
+    at once, with the same confirmation prompt as deleting a single card.
+    ```
 
 ### Multi-select cards with Cmd+Click and move them to another column
 

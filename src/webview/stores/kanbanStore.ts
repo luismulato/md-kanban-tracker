@@ -40,6 +40,7 @@ interface KanbanState {
   moveTaskToTop: (columnId: string, taskId: string) => void;
   deleteTask: (columnId: string, taskId: string) => void;
   moveSelectedTasks: (taskIds: string[], toColumnId: string, atIndex: number) => void;
+  deleteSelectedTasks: (taskIds: string[]) => void;
 
   // selection operations
   toggleTaskSelection: (taskId: string) => void;
@@ -315,6 +316,53 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     } catch {
       // ignore in test environment
     }
+  },
+
+  deleteSelectedTasks: (taskIds) => {
+    const state = get();
+    if (!state.board) return;
+
+    const removingIds = new Set(taskIds);
+
+    // remember each task's original column to notify the backend
+    const fromColumnByTaskId = new Map<string, string>();
+    for (const col of state.board.columns) {
+      for (const task of col.tasks) {
+        if (removingIds.has(task.id)) {
+          fromColumnByTaskId.set(task.id, col.id);
+        }
+      }
+    }
+    if (fromColumnByTaskId.size === 0) return;
+
+    const newColumns = state.board.columns.map(col => ({
+      ...col,
+      tasks: col.tasks.filter(t => !removingIds.has(t.id)),
+    }));
+
+    const newBoard = { ...state.board, columns: newColumns };
+    const newFingerprint = getBoardFingerprint(newBoard);
+
+    set({
+      board: newBoard,
+      _fingerprint: newFingerprint,
+      selectedTaskIds: new Set(),
+      // closing the modal if it was showing one of the deleted tasks
+      openTaskId: state.openTaskId && removingIds.has(state.openTaskId) ? null : state.openTaskId,
+    });
+
+    // post one deleteTask message per task, same as deleting a single card
+    fromColumnByTaskId.forEach((columnId, taskId) => {
+      try {
+        getVSCodeAPI().postMessage({
+          type: 'deleteTask',
+          taskId,
+          columnId,
+        });
+      } catch {
+        // ignore in test environment
+      }
+    });
   },
 
   moveSelectedTasks: (taskIds, toColumnId, atIndex) => {

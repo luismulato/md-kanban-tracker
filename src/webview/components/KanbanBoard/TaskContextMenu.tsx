@@ -5,10 +5,11 @@ interface TaskContextMenuProps {
   y: number;
   onMoveToTop: () => void;
   onDelete: () => void;
+  deleteLabel?: string;
   onClose: () => void;
 }
 
-export function TaskContextMenu({ x, y, onMoveToTop, onDelete, onClose }: TaskContextMenuProps) {
+export function TaskContextMenu({ x, y, onMoveToTop, onDelete, deleteLabel = 'Delete card', onClose }: TaskContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // close on outside click, Escape, or losing focus
@@ -65,7 +66,7 @@ export function TaskContextMenu({ x, y, onMoveToTop, onDelete, onClose }: TaskCo
         onClick={handleDelete}
         className="w-full text-left px-3 py-1.5 text-sm text-vscode-error hover:bg-vscode-list-hoverBg transition-colors"
       >
-        Delete card
+        {deleteLabel}
       </button>
     </div>
   );

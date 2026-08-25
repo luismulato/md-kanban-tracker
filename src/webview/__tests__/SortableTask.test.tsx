@@ -366,4 +366,56 @@ describe('SortableTask multi-select', () => {
     expect(isModalOpenViaStore()).toBe(true);
     expect(useKanbanStore.getState().selectedTaskIds.has('task-1')).toBe(false);
   });
+
+  const secondTask: KanbanTask = { id: 'task-2', title: 'Second Task' };
+
+  const renderBoth = () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <>
+        <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />
+        <SortableTask task={secondTask} columnId="col-1" onUpdateTask={onUpdateTask} />
+      </>,
+      { wrapper }
+    );
+  };
+
+  it('shows a "Delete N cards" option when right-clicking a multi-selected card', () => {
+    renderBoth();
+
+    fireEvent.click(screen.getByText('Test Task'), { metaKey: true });
+    fireEvent.click(screen.getByText('Second Task'), { metaKey: true });
+
+    fireEvent.contextMenu(screen.getByText('Test Task'));
+
+    expect(screen.getByRole('menuitem', { name: 'Delete 2 cards' })).toBeInTheDocument();
+  });
+
+  it('deletes every selected task when the bulk delete option is confirmed', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    renderBoth();
+
+    fireEvent.click(screen.getByText('Test Task'), { metaKey: true });
+    fireEvent.click(screen.getByText('Second Task'), { metaKey: true });
+
+    fireEvent.contextMenu(screen.getByText('Test Task'));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Delete 2 cards' }));
+
+    const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+    expect(tasks).toEqual([]);
+    vi.restoreAllMocks();
+  });
+
+  it('right-clicking a single (non multi-) selected card still shows "Delete card"', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByText('Test Task'), { metaKey: true });
+    fireEvent.contextMenu(screen.getByText('Test Task'));
+
+    expect(screen.getByRole('menuitem', { name: 'Delete card' })).toBeInTheDocument();
+  });
 });

@@ -369,6 +369,65 @@ describe('kanbanStore', () => {
     });
   });
 
+  describe('deleteSelectedTasks', () => {
+    it('removes every given task, from any column', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().deleteSelectedTasks(['task-1', 'task-3']);
+
+      const columns = useKanbanStore.getState().board?.columns;
+      expect(columns?.[0].tasks.map(t => t.id)).toEqual(['task-2']);
+      expect(columns?.[1].tasks).toHaveLength(0);
+    });
+
+    it('clears the selection after deleting', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+      useKanbanStore.getState().toggleTaskSelection('task-1');
+      useKanbanStore.getState().toggleTaskSelection('task-3');
+
+      useKanbanStore.getState().deleteSelectedTasks(['task-1', 'task-3']);
+
+      expect(useKanbanStore.getState().selectedTaskIds.size).toBe(0);
+    });
+
+    it('closes the modal if it was open on one of the deleted tasks', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+      useKanbanStore.getState().openModal('task-1');
+
+      useKanbanStore.getState().deleteSelectedTasks(['task-1', 'task-3']);
+
+      expect(useKanbanStore.getState().openTaskId).toBeNull();
+    });
+
+    it('leaves the modal open when it is showing an unrelated task', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+      useKanbanStore.getState().openModal('task-2');
+
+      useKanbanStore.getState().deleteSelectedTasks(['task-1', 'task-3']);
+
+      expect(useKanbanStore.getState().openTaskId).toBe('task-2');
+    });
+
+    it('does nothing when none of the given ids exist', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().deleteSelectedTasks(['missing-1', 'missing-2']);
+
+      const columns = useKanbanStore.getState().board?.columns;
+      expect(columns?.[0].tasks.map(t => t.id)).toEqual(['task-1', 'task-2']);
+      expect(columns?.[1].tasks.map(t => t.id)).toEqual(['task-3']);
+    });
+
+    it('does nothing when there is no board', () => {
+      expect(() => useKanbanStore.getState().deleteSelectedTasks(['task-1'])).not.toThrow();
+    });
+  });
+
   describe('toggleTaskSelection / clearSelection', () => {
     it('adds a task to the selection when toggled on', () => {
       useKanbanStore.getState().toggleTaskSelection('task-1');

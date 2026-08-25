@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { KanbanTask } from '../../types/kanban';
 import { TaskCard } from './TaskCard';
 import { TaskContextMenu } from './TaskContextMenu';
-import { useKanbanStore, useIsTaskSelected } from '../../stores/kanbanStore';
+import { useKanbanStore, useIsTaskSelected, useSelectedTaskCount } from '../../stores/kanbanStore';
 
 interface SortableTaskProps {
   task: KanbanTask;
@@ -16,8 +16,11 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
   const openModal = useKanbanStore((s) => s.openModal);
   const moveTaskToTop = useKanbanStore((s) => s.moveTaskToTop);
   const deleteTask = useKanbanStore((s) => s.deleteTask);
+  const deleteSelectedTasks = useKanbanStore((s) => s.deleteSelectedTasks);
   const toggleTaskSelection = useKanbanStore((s) => s.toggleTaskSelection);
   const isSelected = useIsTaskSelected(task.id);
+  const selectedCount = useSelectedTaskCount();
+  const isMultiSelected = isSelected && selectedCount > 1;
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   const {
@@ -58,6 +61,15 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
   };
 
   const handleDelete = () => {
+    if (isMultiSelected) {
+      const ids = Array.from(useKanbanStore.getState().selectedTaskIds);
+      // deletion can't be undone, so confirm before touching the board
+      if (window.confirm(`Delete ${ids.length} cards? This can't be undone.`)) {
+        deleteSelectedTasks(ids);
+      }
+      return;
+    }
+
     // deletion can't be undone, so confirm before touching the board
     if (window.confirm(`Delete "${task.title}"? This can't be undone.`)) {
       deleteTask(columnId, task.id);
@@ -84,6 +96,7 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
           y={contextMenuPos.y}
           onMoveToTop={() => moveTaskToTop(columnId, task.id)}
           onDelete={handleDelete}
+          deleteLabel={isMultiSelected ? `Delete ${selectedCount} cards` : 'Delete card'}
           onClose={() => setContextMenuPos(null)}
         />
       )}
