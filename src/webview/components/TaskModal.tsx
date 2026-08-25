@@ -266,6 +266,7 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
                 type="text"
                 value={localTitle}
                 onChange={handleTitleChange}
+                onFocus={(e) => e.target.select()}
                 placeholder="Task title..."
                 autoFocus
                 {...stopProp}

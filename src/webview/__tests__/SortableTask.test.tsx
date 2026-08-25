@@ -85,7 +85,7 @@ describe('SortableTask modal behavior', () => {
   it('should open modal when task card is clicked', () => {
     const onUpdateTask = vi.fn();
     render(
-      <SortableTask task={baseTask} onUpdateTask={onUpdateTask} />,
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
       { wrapper: wrapperWithChecker }
     );
 
@@ -104,7 +104,7 @@ describe('SortableTask modal behavior', () => {
     const onUpdateTask = vi.fn();
     const { rerender } = render(
       <>
-        <SortableTask task={baseTask} onUpdateTask={onUpdateTask} />
+        <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />
         <ModalChecker />
       </>,
       { wrapper }
@@ -124,7 +124,7 @@ describe('SortableTask modal behavior', () => {
     };
     rerender(
       <>
-        <SortableTask task={updatedTask} onUpdateTask={onUpdateTask} />
+        <SortableTask task={updatedTask} columnId="col-1" onUpdateTask={onUpdateTask} />
         <ModalChecker />
       </>
     );
@@ -137,7 +137,7 @@ describe('SortableTask modal behavior', () => {
     const onUpdateTask = vi.fn();
     const { rerender } = render(
       <>
-        <SortableTask task={baseTask} onUpdateTask={onUpdateTask} />
+        <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />
         <ModalChecker />
       </>,
       { wrapper }
@@ -155,12 +155,81 @@ describe('SortableTask modal behavior', () => {
       };
       rerender(
         <>
-          <SortableTask task={updatedTask} onUpdateTask={onUpdateTask} />
+          <SortableTask task={updatedTask} columnId="col-1" onUpdateTask={onUpdateTask} />
           <ModalChecker />
         </>
       );
       // modal should still be open after each re-render
       expect(isModalOpenViaStore()).toBe(true);
     }
+  });
+});
+
+describe('SortableTask context menu', () => {
+  const baseTask: KanbanTask = {
+    id: 'task-1',
+    title: 'Test Task',
+  };
+
+  beforeEach(() => {
+    useKanbanStore.setState({
+      board: {
+        title: 'Board',
+        columns: [
+          {
+            id: 'col-1',
+            title: 'To Do',
+            tasks: [
+              baseTask,
+              { id: 'task-2', title: 'Second Task' },
+            ],
+          },
+        ],
+      },
+      isLoading: false,
+      isDragging: false,
+      dragPreview: null,
+      openTaskId: null,
+    });
+  });
+
+  it('shows "Move to top" option on right-click', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.contextMenu(screen.getByText('Test Task'));
+
+    expect(screen.getByRole('menuitem', { name: 'Move to top' })).toBeInTheDocument();
+  });
+
+  it('moves the task to the top of its column when clicked', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={{ id: 'task-2', title: 'Second Task' }} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.contextMenu(screen.getByText('Second Task'));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Move to top' }));
+
+    const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+    expect(tasks?.[0].id).toBe('task-2');
+  });
+
+  it('closes the menu on Escape', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.contextMenu(screen.getByText('Test Task'));
+    expect(screen.getByRole('menuitem', { name: 'Move to top' })).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('menuitem', { name: 'Move to top' })).not.toBeInTheDocument();
   });
 });

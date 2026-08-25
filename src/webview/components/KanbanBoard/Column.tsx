@@ -28,6 +28,16 @@ function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
     openModalForNewTask(column.id);
   };
 
+  // clicking the empty area of the task list (not a task card) opens the
+  // same "new note" modal as the Add card button. Guarded by target===
+  // currentTarget so clicks that bubble up from a task or its children
+  // don't also trigger this (which would clobber the edit-modal state
+  // openModal(taskId) just set with openModalForNewTask's newTaskColumnId).
+  const handleEmptyAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) return;
+    openModalForNewTask(column.id);
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -52,11 +62,16 @@ function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
       </div>
 
       <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2 min-h-[100px] flex-1">
+        <div
+          className="space-y-2 min-h-[100px] flex-1"
+          onClick={handleEmptyAreaClick}
+          data-testid={`column-empty-area-${column.id}`}
+        >
           {column.tasks.map((task) => (
             <SortableTask
               key={task.id}
               task={task}
+              columnId={column.id}
               onUpdateTask={onUpdateTask}
             />
           ))}

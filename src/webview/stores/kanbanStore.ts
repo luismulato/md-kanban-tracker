@@ -36,6 +36,7 @@ interface KanbanState {
   addTask: (columnId: string, taskData: Partial<KanbanTask>) => void;
   moveTask: (taskId: string, fromColumnId: string, toColumnId: string, newIndex: number) => void;
   reorderTask: (columnId: string, oldIndex: number, newIndex: number) => void;
+  moveTaskToTop: (columnId: string, taskId: string) => void;
 
   // drag operations
   startDrag: (taskId: string) => void;
@@ -251,6 +252,19 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     } catch {
       // ignore in test environment
     }
+  },
+
+  moveTaskToTop: (columnId, taskId) => {
+    const state = get();
+    if (!state.board) return;
+
+    const column = state.board.columns.find(c => c.id === columnId);
+    if (!column) return;
+
+    const oldIndex = column.tasks.findIndex(t => t.id === taskId);
+    if (oldIndex <= 0) return;
+
+    get().reorderTask(columnId, oldIndex, 0);
   },
 
   startDrag: (taskId) => {

@@ -289,6 +289,39 @@ describe('kanbanStore', () => {
     });
   });
 
+  describe('moveTaskToTop', () => {
+    it('moves a task to the top of its column', () => {
+      const board = createMockBoard();
+      board.columns[0].tasks.push({ id: 'task-4', title: 'Task 4' });
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().moveTaskToTop('col-1', 'task-4');
+
+      const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+      expect(tasks?.map(t => t.id)).toEqual(['task-4', 'task-1', 'task-2']);
+    });
+
+    it('does nothing when the task is already at the top', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().moveTaskToTop('col-1', 'task-1');
+
+      const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+      expect(tasks?.map(t => t.id)).toEqual(['task-1', 'task-2']);
+    });
+
+    it('does nothing when the task is not found', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().moveTaskToTop('col-1', 'missing-task');
+
+      const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+      expect(tasks?.map(t => t.id)).toEqual(['task-1', 'task-2']);
+    });
+  });
+
   describe('addTask', () => {
     it('adds new task to specified column', () => {
       const board = createMockBoard();

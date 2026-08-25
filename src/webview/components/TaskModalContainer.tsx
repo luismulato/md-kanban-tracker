@@ -3,6 +3,14 @@ import { TaskModal } from './TaskModal';
 import { useModalTask, useKanbanStore, useNewTaskColumnId } from '../stores/kanbanStore';
 import type { KanbanTask } from '../types/kanban';
 
+// default title shown when quick-adding a note (Add card button or clicking
+// an empty column area) — the user can overwrite it before creating
+const DEFAULT_NEW_TASK: Partial<KanbanTask> = {
+  title: 'New note',
+  description: '',
+  steps: [],
+};
+
 /**
  * Container that connects TaskModal to the Zustand store.
  * Uses selectors to ensure modal only re-renders when relevant data changes.
@@ -16,11 +24,7 @@ export function TaskModalContainer() {
   const addTask = useKanbanStore((s) => s.addTask);
 
   // local state for new task being created
-  const [newTaskData, setNewTaskData] = useState<Partial<KanbanTask>>({
-    title: '',
-    description: '',
-    steps: [],
-  });
+  const [newTaskData, setNewTaskData] = useState<Partial<KanbanTask>>(DEFAULT_NEW_TASK);
 
   const handleToggleStep = useCallback((stepIndex: number) => {
     if (task?.steps) {
@@ -45,12 +49,12 @@ export function TaskModalContainer() {
   const handleCreateTask = useCallback(() => {
     if (!newTaskColumnId || !newTaskData.title?.trim()) return;
     addTask(newTaskColumnId, newTaskData);
-    setNewTaskData({ title: '', description: '', steps: [] });
+    setNewTaskData(DEFAULT_NEW_TASK);
     closeModal();
   }, [newTaskColumnId, newTaskData, addTask, closeModal]);
 
   const handleClose = useCallback(() => {
-    setNewTaskData({ title: '', description: '', steps: [] });
+    setNewTaskData(DEFAULT_NEW_TASK);
     closeModal();
   }, [closeModal]);
 

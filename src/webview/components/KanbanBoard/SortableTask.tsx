@@ -1,17 +1,21 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { KanbanTask } from '../../types/kanban';
 import { TaskCard } from './TaskCard';
+import { TaskContextMenu } from './TaskContextMenu';
 import { useKanbanStore } from '../../stores/kanbanStore';
 
 interface SortableTaskProps {
   task: KanbanTask;
+  columnId: string;
   onUpdateTask: (taskId: string, updates: Partial<KanbanTask>) => void;
 }
 
-function SortableTaskComponent({ task, onUpdateTask }: SortableTaskProps) {
+function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskProps) {
   const openModal = useKanbanStore((s) => s.openModal);
+  const moveTaskToTop = useKanbanStore((s) => s.moveTaskToTop);
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   const {
     attributes,
@@ -40,17 +44,34 @@ function SortableTaskComponent({ task, onUpdateTask }: SortableTaskProps) {
     openModal(task.id);
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenuPos({ x: e.clientX, y: e.clientY });
+  };
+
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      onClick={handleClick}
-      className="cursor-grab active:cursor-grabbing"
-    >
-      <TaskCard task={task} isDragging={isDragging} />
-    </div>
+    <>
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onClick={handleClick}
+        onContextMenu={handleContextMenu}
+        className="cursor-grab active:cursor-grabbing"
+      >
+        <TaskCard task={task} isDragging={isDragging} />
+      </div>
+
+      {contextMenuPos && (
+        <TaskContextMenu
+          x={contextMenuPos.x}
+          y={contextMenuPos.y}
+          onMoveToTop={() => moveTaskToTop(columnId, task.id)}
+          onClose={() => setContextMenuPos(null)}
+        />
+      )}
+    </>
   );
 }
 
