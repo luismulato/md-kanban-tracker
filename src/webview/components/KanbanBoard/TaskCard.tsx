@@ -1,12 +1,13 @@
 import { memo } from 'react';
 import type { KanbanTask } from '../../types/kanban';
 import { Badge } from '../atoms/Badge';
-import { TASK_TYPE_LABELS, TASK_TYPE_BADGE_VARIANT } from '../../utils/taskType';
+import { TASK_TYPE_LABELS, TASK_TYPE_BADGE_VARIANT, nextTaskType } from '../../utils/taskType';
 
 interface TaskCardProps {
   task: KanbanTask;
   isDragging?: boolean;
   isOverlay?: boolean;
+  onUpdateTask?: (taskId: string, updates: Partial<KanbanTask>) => void;
 }
 
 function getPriorityBorderClass(priority: string) {
@@ -18,7 +19,7 @@ function getPriorityBorderClass(priority: string) {
   }
 }
 
-function TaskCardComponent({ task, isDragging = false, isOverlay = false }: TaskCardProps) {
+function TaskCardComponent({ task, isDragging = false, isOverlay = false, onUpdateTask }: TaskCardProps) {
   const baseClasses = 'bg-vscode-background p-3 rounded border';
 
   const priorityClasses = task.priority ? getPriorityBorderClass(task.priority) : '';
@@ -29,10 +30,20 @@ function TaskCardComponent({ task, isDragging = false, isOverlay = false }: Task
     ? 'opacity-40 border-vscode-focusBorder'
     : 'border-vscode-input-border';
 
+  const handleTypeClick = (e: React.MouseEvent) => {
+    // click cycles the type; stop propagation so it doesn't also open the task modal
+    e.stopPropagation();
+    onUpdateTask?.(task.id, { type: nextTaskType(task.type) });
+  };
+
   return (
     <div className={`${baseClasses} ${stateClasses} ${priorityClasses}`}>
       {task.type && (
-        <Badge variant={TASK_TYPE_BADGE_VARIANT[task.type]} className="mb-1">
+        <Badge
+          variant={TASK_TYPE_BADGE_VARIANT[task.type]}
+          className={`mb-1 ${onUpdateTask ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+          onClick={onUpdateTask ? handleTypeClick : undefined}
+        >
           {TASK_TYPE_LABELS[task.type]}
         </Badge>
       )}

@@ -60,7 +60,7 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
         onContextMenu={handleContextMenu}
         className="cursor-grab active:cursor-grabbing"
       >
-        <TaskCard task={task} isDragging={isDragging} />
+        <TaskCard task={task} isDragging={isDragging} onUpdateTask={onUpdateTask} />
       </div>
 
       {contextMenuPos && (

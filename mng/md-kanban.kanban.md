@@ -6,12 +6,12 @@
 
 - tags: [epic]
 
+### Linkear el feature creado en bdd dentro de la doc de la tarjeta como un link navegable (relativo)
+
+
 ## To Do
 
 ### Borrar una tarjeta desde la vista de kanban
-
-
-### Cambiar tipo de tarjeta con un click, rotativo (epic,story,task, spike)
 
 
 ### Agregar timer automático al pasar al WIP, al lado derecho del titulo principal con el tiempo transcurrido y un botón de pausa/restart y otro de reset
@@ -23,6 +23,8 @@
 ## WIP
 
 ## Done
+
+### Cambiar tipo de tarjeta con un click, rotativo (epic,story,task, spike)
 
 ### Agregar type a las tarjetas: epic, story, task, spike
 

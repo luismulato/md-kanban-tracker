@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TaskCard } from '../components/KanbanBoard/TaskCard';
 import type { KanbanTask } from '../types/kanban';
 
@@ -77,6 +77,48 @@ describe('TaskCard', () => {
       const task: KanbanTask = { id: '1', title: 'Test Task' };
       const { container } = render(<TaskCard task={task} />);
       expect(container.querySelectorAll('.rounded-full')).toHaveLength(0);
+    });
+  });
+
+  describe('Type click-to-cycle', () => {
+    const transitions: Array<[KanbanTask['type'], string, KanbanTask['type']]> = [
+      ['epic', 'Epic', 'story'],
+      ['story', 'Story', 'task'],
+      ['task', 'Task', 'spike'],
+      ['spike', 'Spike', undefined],
+    ];
+
+    it.each(transitions)('clicking the %s badge sets the next type in the cycle', (current, label, expectedNext) => {
+      const onUpdateTask = vi.fn();
+      const task: KanbanTask = { id: '1', title: 'Test Task', type: current };
+      render(<TaskCard task={task} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText(label));
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { type: expectedNext });
+    });
+
+    it('does not throw when clicked without an onUpdateTask handler', () => {
+      const task: KanbanTask = { id: '1', title: 'Test Task', type: 'story' };
+      render(<TaskCard task={task} />);
+      expect(() => fireEvent.click(screen.getByText('Story'))).not.toThrow();
+    });
+
+    it('stops propagation so clicking the badge does not bubble to a parent handler', () => {
+      const onUpdateTask = vi.fn();
+      const onParentClick = vi.fn();
+      const task: KanbanTask = { id: '1', title: 'Test Task', type: 'story' };
+
+      render(
+        <div onClick={onParentClick}>
+          <TaskCard task={task} onUpdateTask={onUpdateTask} />
+        </div>
+      );
+
+      fireEvent.click(screen.getByText('Story'));
+
+      expect(onUpdateTask).toHaveBeenCalledTimes(1);
+      expect(onParentClick).not.toHaveBeenCalled();
     });
   });
 
