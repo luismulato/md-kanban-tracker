@@ -64,6 +64,7 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
       e.preventDefault();
       e.stopPropagation();
       commitTitleEdit();
+      onClose();
     } else if (e.key === 'Escape') {
       e.preventDefault();
       e.stopPropagation();

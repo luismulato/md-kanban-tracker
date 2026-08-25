@@ -408,6 +408,19 @@ describe('TaskModal', () => {
       expect(screen.queryByDisplayValue('Renamed task')).not.toBeInTheDocument();
     });
 
+    it('also closes the whole modal on Enter', () => {
+      const onClose = vi.fn();
+      const onUpdateTask = vi.fn();
+      render(<TaskModal {...defaultProps} onClose={onClose} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Test Task'));
+      const input = screen.getByDisplayValue('Test Task');
+      fireEvent.change(input, { target: { value: 'Renamed task' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
     it('reverts to the original title on Escape without saving', () => {
       const onUpdateTask = vi.fn();
       render(<TaskModal {...defaultProps} onUpdateTask={onUpdateTask} />);

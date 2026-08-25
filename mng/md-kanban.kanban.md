@@ -15,12 +15,20 @@
 
 ## To Do
 
-### Cuando edita una tarjeta y da enter debe cerrarla
-
-
 ## WIP
 
 ## Done
+
+### Cuando edita una tarjeta y da enter debe cerrarla
+
+    ```md
+    Alcance: solo el título de la tarjeta (click para editar). Enter
+    ahora guarda Y cierra todo el modal, no solo el modo edición del
+    título. Descripción (textarea) y los inputs de steps quedan sin
+    tocar — Enter ahí sigue con su comportamiento normal (salto de
+    línea / nada), forzar el cierre del modal en cada uno hubiera sido
+    disruptivo.
+    ```
 
 ### Agregar timer automático al pasar al WIP, con pausa/restart y reset por tarjeta y por columna
 
