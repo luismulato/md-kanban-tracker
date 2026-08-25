@@ -37,6 +37,7 @@ interface KanbanState {
   moveTask: (taskId: string, fromColumnId: string, toColumnId: string, newIndex: number) => void;
   reorderTask: (columnId: string, oldIndex: number, newIndex: number) => void;
   moveTaskToTop: (columnId: string, taskId: string) => void;
+  deleteTask: (columnId: string, taskId: string) => void;
 
   // drag operations
   startDrag: (taskId: string) => void;
@@ -265,6 +266,48 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     if (oldIndex <= 0) return;
 
     get().reorderTask(columnId, oldIndex, 0);
+  },
+
+  deleteTask: (columnId, taskId) => {
+    const state = get();
+    if (!state.board) return;
+
+    const column = state.board.columns.find(c => c.id === columnId);
+    if (!column) return;
+
+    const taskIndex = column.tasks.findIndex(t => t.id === taskId);
+    if (taskIndex === -1) return;
+
+    const newColumns = state.board.columns.map(col => {
+      if (col.id === columnId) {
+        return {
+          ...col,
+          tasks: col.tasks.filter(t => t.id !== taskId),
+        };
+      }
+      return col;
+    });
+
+    const newBoard = { ...state.board, columns: newColumns };
+    const newFingerprint = getBoardFingerprint(newBoard);
+
+    set({
+      board: newBoard,
+      _fingerprint: newFingerprint,
+      // closing the modal if it was showing the task we just deleted
+      openTaskId: state.openTaskId === taskId ? null : state.openTaskId,
+    });
+
+    // post message to extension
+    try {
+      getVSCodeAPI().postMessage({
+        type: 'deleteTask',
+        taskId,
+        columnId,
+      });
+    } catch {
+      // ignore in test environment
+    }
   },
 
   startDrag: (taskId) => {

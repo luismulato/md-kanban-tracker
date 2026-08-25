@@ -15,17 +15,21 @@
 
 ## To Do
 
-### Borrar una tarjeta desde la vista de kanban
-
-
 ### Agregar timer automático al pasar al WIP, al lado derecho del titulo principal con el tiempo transcurrido y un botón de pausa/restart y otro de reset
+
+
+### Cuando edita una tarjeta y da enter debe cerrarla
 
 
 ## WIP
 
 ## Done
 
+### Borrar una tarjeta desde la vista de kanban
+
+
 ### Editar tipo de tarjeta dentro de la card.
+
 
 ### Cambiar tipo de tarjeta con un click, rotativo (epic,story,task, spike)
 

@@ -15,6 +15,7 @@ interface SortableTaskProps {
 function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskProps) {
   const openModal = useKanbanStore((s) => s.openModal);
   const moveTaskToTop = useKanbanStore((s) => s.moveTaskToTop);
+  const deleteTask = useKanbanStore((s) => s.deleteTask);
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   const {
@@ -49,6 +50,13 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
     setContextMenuPos({ x: e.clientX, y: e.clientY });
   };
 
+  const handleDelete = () => {
+    // deletion can't be undone, so confirm before touching the board
+    if (window.confirm(`Delete "${task.title}"? This can't be undone.`)) {
+      deleteTask(columnId, task.id);
+    }
+  };
+
   return (
     <>
       <div
@@ -68,6 +76,7 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
           x={contextMenuPos.x}
           y={contextMenuPos.y}
           onMoveToTop={() => moveTaskToTop(columnId, task.id)}
+          onDelete={handleDelete}
           onClose={() => setContextMenuPos(null)}
         />
       )}

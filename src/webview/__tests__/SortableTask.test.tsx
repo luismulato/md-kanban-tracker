@@ -232,4 +232,48 @@ describe('SortableTask context menu', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('menuitem', { name: 'Move to top' })).not.toBeInTheDocument();
   });
+
+  it('shows "Delete card" option on right-click', () => {
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.contextMenu(screen.getByText('Test Task'));
+
+    expect(screen.getByRole('menuitem', { name: 'Delete card' })).toBeInTheDocument();
+  });
+
+  it('deletes the task when confirmed', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.contextMenu(screen.getByText('Test Task'));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Delete card' }));
+
+    const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+    expect(tasks?.map(t => t.id)).toEqual(['task-2']);
+    vi.restoreAllMocks();
+  });
+
+  it('does not delete the task when confirmation is cancelled', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const onUpdateTask = vi.fn();
+    render(
+      <SortableTask task={baseTask} columnId="col-1" onUpdateTask={onUpdateTask} />,
+      { wrapper }
+    );
+
+    fireEvent.contextMenu(screen.getByText('Test Task'));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Delete card' }));
+
+    const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+    expect(tasks?.map(t => t.id)).toEqual(['task-1', 'task-2']);
+    vi.restoreAllMocks();
+  });
 });

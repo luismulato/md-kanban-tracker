@@ -322,6 +322,52 @@ describe('kanbanStore', () => {
     });
   });
 
+  describe('deleteTask', () => {
+    it('removes the task from its column', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().deleteTask('col-1', 'task-1');
+
+      const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+      expect(tasks?.map(t => t.id)).toEqual(['task-2']);
+    });
+
+    it('closes the modal when deleting the task that is open', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+      useKanbanStore.getState().openModal('task-1');
+
+      useKanbanStore.getState().deleteTask('col-1', 'task-1');
+
+      expect(useKanbanStore.getState().openTaskId).toBeNull();
+    });
+
+    it('leaves the modal open when deleting a different task', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+      useKanbanStore.getState().openModal('task-2');
+
+      useKanbanStore.getState().deleteTask('col-1', 'task-1');
+
+      expect(useKanbanStore.getState().openTaskId).toBe('task-2');
+    });
+
+    it('does nothing when the task is not found', () => {
+      const board = createMockBoard();
+      useKanbanStore.getState().setBoard(board);
+
+      useKanbanStore.getState().deleteTask('col-1', 'missing-task');
+
+      const tasks = useKanbanStore.getState().board?.columns[0].tasks;
+      expect(tasks?.map(t => t.id)).toEqual(['task-1', 'task-2']);
+    });
+
+    it('does nothing when there is no board', () => {
+      expect(() => useKanbanStore.getState().deleteTask('col-1', 'task-1')).not.toThrow();
+    });
+  });
+
   describe('addTask', () => {
     it('adds new task to specified column', () => {
       const board = createMockBoard();

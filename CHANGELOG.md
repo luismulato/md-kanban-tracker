@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 
+- **Delete a card from the board**: right-click a card and choose "Delete card" to remove it, with a confirmation prompt since it can't be undone. The extension backend already supported a `deleteTask` message; this wires up the missing frontend trigger.
 - **Task type**: cards can now carry a `type` (`epic`, `story`, `task`, `spike`), set via the `- type: <value>` property in markdown. Shown as a badge on the card when set.
 - **Click-to-cycle task type**: clicking a card's type badge cycles it through `epic -> story -> task -> spike -> (unset)`, same interaction as the priority/workload badges in the task modal.
 - **Edit task type in the task modal**: the task modal now shows a type badge (or a "+ Type" placeholder when unset) next to priority/workload, cycling `epic -> story -> task -> spike -> (unset)` on click. This is also how a task first gets a type, since the card's badge only appears once one is set.

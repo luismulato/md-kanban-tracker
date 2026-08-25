@@ -4,10 +4,11 @@ interface TaskContextMenuProps {
   x: number;
   y: number;
   onMoveToTop: () => void;
+  onDelete: () => void;
   onClose: () => void;
 }
 
-export function TaskContextMenu({ x, y, onMoveToTop, onClose }: TaskContextMenuProps) {
+export function TaskContextMenu({ x, y, onMoveToTop, onDelete, onClose }: TaskContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // close on outside click, Escape, or losing focus
@@ -36,6 +37,11 @@ export function TaskContextMenu({ x, y, onMoveToTop, onClose }: TaskContextMenuP
     onClose();
   };
 
+  const handleDelete = () => {
+    onDelete();
+    onClose();
+  };
+
   return (
     <div
       ref={menuRef}
@@ -52,6 +58,14 @@ export function TaskContextMenu({ x, y, onMoveToTop, onClose }: TaskContextMenuP
         className="w-full text-left px-3 py-1.5 text-sm text-vscode-foreground hover:bg-vscode-list-hoverBg transition-colors"
       >
         Move to top
+      </button>
+      <div className="my-1 border-t border-vscode-input-border" />
+      <button
+        role="menuitem"
+        onClick={handleDelete}
+        className="w-full text-left px-3 py-1.5 text-sm text-vscode-error hover:bg-vscode-list-hoverBg transition-colors"
+      >
+        Delete card
       </button>
     </div>
   );
