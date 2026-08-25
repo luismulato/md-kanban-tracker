@@ -56,6 +56,30 @@ describe('TaskCard', () => {
     });
   });
 
+  describe('Type badge', () => {
+    it('renders a badge for each task type', () => {
+      const types = [
+        ['epic', 'Epic'],
+        ['story', 'Story'],
+        ['task', 'Task'],
+        ['spike', 'Spike'],
+      ] as const;
+
+      for (const [type, label] of types) {
+        const task: KanbanTask = { id: '1', title: 'Test Task', type };
+        const { unmount } = render(<TaskCard task={task} />);
+        expect(screen.getByText(label)).toBeInTheDocument();
+        unmount();
+      }
+    });
+
+    it('renders no type badge when type is undefined', () => {
+      const task: KanbanTask = { id: '1', title: 'Test Task' };
+      const { container } = render(<TaskCard task={task} />);
+      expect(container.querySelectorAll('.rounded-full')).toHaveLength(0);
+    });
+  });
+
   describe('Tags display', () => {
     it('renders tags as badges', () => {
       const task: KanbanTask = {

@@ -1,5 +1,7 @@
 import { memo } from 'react';
 import type { KanbanTask } from '../../types/kanban';
+import { Badge } from '../atoms/Badge';
+import { TASK_TYPE_LABELS, TASK_TYPE_BADGE_VARIANT } from '../../utils/taskType';
 
 interface TaskCardProps {
   task: KanbanTask;
@@ -29,6 +31,11 @@ function TaskCardComponent({ task, isDragging = false, isOverlay = false }: Task
 
   return (
     <div className={`${baseClasses} ${stateClasses} ${priorityClasses}`}>
+      {task.type && (
+        <Badge variant={TASK_TYPE_BADGE_VARIANT[task.type]} className="mb-1">
+          {TASK_TYPE_LABELS[task.type]}
+        </Badge>
+      )}
       <h3 className="font-medium text-vscode-foreground">{task.title}</h3>
 
       {task.tags && task.tags.length > 0 && (
@@ -59,6 +66,7 @@ export const TaskCard = memo(TaskCardComponent, (prevProps, nextProps) => {
   return (
     prevProps.task.id === nextProps.task.id &&
     prevProps.task.title === nextProps.task.title &&
+    prevProps.task.type === nextProps.task.type &&
     prevProps.task.priority === nextProps.task.priority &&
     prevProps.task.workload === nextProps.task.workload &&
     prevProps.isDragging === nextProps.isDragging &&

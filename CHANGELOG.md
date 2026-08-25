@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Features
+
+- **Task type**: cards can now carry a `type` (`epic`, `story`, `task`, `spike`), set via the `- type: <value>` property in markdown. Shown as a badge on the card when set.
+
 ## [0.1.0] - 2026-08-23 (md-kanban-tracker fork)
 
 ### Features

@@ -1,8 +1,11 @@
+export type TaskType = 'epic' | 'story' | 'task' | 'spike';
+
 export interface KanbanTask {
   id: string;
   title: string;
   description?: string;
   tags?: string[];
+  type?: TaskType;
   priority?: 'low' | 'medium' | 'high';
   workload?: 'Easy' | 'Normal' | 'Hard' | 'Extreme';
   dueDate?: string;

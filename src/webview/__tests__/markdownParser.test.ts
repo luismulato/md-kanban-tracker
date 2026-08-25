@@ -119,6 +119,58 @@ describe('MarkdownKanbanParser', () => {
     });
   });
 
+  describe('parseMarkdown - Type', () => {
+    it('parses all task types', () => {
+      const markdown = `# Board
+
+## Column
+
+### An Epic
+  - type: epic
+
+### A Story
+  - type: story
+
+### A Task
+  - type: task
+
+### A Spike
+  - type: spike
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      expect(board.columns[0].tasks[0].type).toBe('epic');
+      expect(board.columns[0].tasks[1].type).toBe('story');
+      expect(board.columns[0].tasks[2].type).toBe('task');
+      expect(board.columns[0].tasks[3].type).toBe('spike');
+    });
+
+    it('ignores an invalid type value', () => {
+      const markdown = `# Board
+
+## Column
+
+### Task One
+  - type: bogus
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      expect(board.columns[0].tasks[0].type).toBeUndefined();
+    });
+
+    it('round-trips type through generateMarkdown', () => {
+      const markdown = `# Board
+
+## Column
+
+### A Story
+  - type: story
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      const regenerated = MarkdownKanbanParser.generateMarkdown(board);
+      const reparsed = MarkdownKanbanParser.parseMarkdown(regenerated);
+      expect(reparsed.columns[0].tasks[0].type).toBe('story');
+    });
+  });
+
   describe('parseMarkdown - Tags', () => {
     it('parses inline hashtag tags', () => {
       const markdown = `# Board
@@ -221,6 +273,7 @@ describe('MarkdownKanbanParser', () => {
 
 ### Complete Task
 #urgent
+  - type: story
   - priority: high
   - workload: Hard
   - due: 2024-12-25
@@ -233,6 +286,7 @@ describe('MarkdownKanbanParser', () => {
       const task = board.columns[0].tasks[0];
 
       expect(task.title).toBe('Complete Task');
+      expect(task.type).toBe('story');
       expect(task.priority).toBe('high');
       expect(task.workload).toBe('Hard');
       expect(task.dueDate).toBe('2024-12-25');

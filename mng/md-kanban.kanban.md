@@ -8,10 +8,6 @@
 
 ## To Do
 
-### Agregar type a las tarjetas: epic, story, task, spike
-
-- tags: [story]
-
 ### Borrar una tarjeta desde la vista de kanban
 
 
@@ -27,6 +23,10 @@
 ## WIP
 
 ## Done
+
+### Agregar type a las tarjetas: epic, story, task, spike
+
+- tags: [story]
 
 ### En una tarjeta, al hacer click derecho, Agregar opción "move on top" (nombrala mejor con algun estandar) para que una card quede de primera en su columna.
 
