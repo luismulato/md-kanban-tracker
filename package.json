@@ -3,7 +3,7 @@
   "displayName": "md-kanban-tracker",
   "description": "Kanban board editor for .kanban.md files, with built-in WIP-limit/timer automation and inline editing — fork of kanban.md",
   "publisher": "luismulato",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.106.0"
   },

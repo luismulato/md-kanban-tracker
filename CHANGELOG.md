@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-25
+
 ### Features
 
 - **Enter closes the modal when editing a card's title**: pressing Enter while renaming a task's title (click-to-edit) now saves the new title and closes the whole task modal, instead of just exiting title-edit mode. Scoped to the title field only — the description textarea and step-text inputs keep Enter's normal behavior (newline / no-op), since forcing a close from every field would be disruptive.
@@ -21,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Task type**: cards can now carry a `type` (`epic`, `story`, `task`, `spike`), set via the `- type: <value>` property in markdown. Shown as a badge on the card when set.
 - **Click-to-cycle task type**: clicking a card's type badge cycles it through `epic -> story -> task -> spike -> (unset)`, same interaction as the priority/workload badges in the task modal.
 - **Edit task type in the task modal**: the task modal now shows a type badge (or a "+ Type" placeholder when unset) next to priority/workload, cycling `epic -> story -> task -> spike -> (unset)` on click. This is also how a task first gets a type, since the card's badge only appears once one is set.
+- **Move a card to the top of its column**: right-click a card and choose "Move to top" to reorder it to the first position in its column.
+- **Quick-add a note**: clicking a column's empty area (or the existing "+ Add card" button) opens the task modal in create mode pre-filled with the title "New note", ready to edit or accept as-is.
 
 ## [0.1.0] - 2026-08-23 (md-kanban-tracker fork)
 
