@@ -8,6 +8,10 @@
 
 ### Linkear el feature creado en bdd dentro de la doc de la tarjeta como un link navegable (relativo)
 
+    ```md
+    El link se debe poder ver dentro de las tarjetas.
+    Y dentro del as columnas.
+    ```
 
 ## To Do
 
@@ -17,14 +21,14 @@
 ### Agregar timer automático al pasar al WIP, al lado derecho del titulo principal con el tiempo transcurrido y un botón de pausa/restart y otro de reset
 
 
-### Editar tipo de tarjeta dentro de la card.
-
-
 ## WIP
 
 ## Done
 
+### Editar tipo de tarjeta dentro de la card.
+
 ### Cambiar tipo de tarjeta con un click, rotativo (epic,story,task, spike)
+
 
 ### Agregar type a las tarjetas: epic, story, task, spike
 

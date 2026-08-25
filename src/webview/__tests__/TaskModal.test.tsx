@@ -20,6 +20,58 @@ describe('TaskModal', () => {
     vi.clearAllMocks();
   });
 
+  describe('Type cycling', () => {
+    it('cycles type from undefined to epic when clicked', () => {
+      const onUpdateTask = vi.fn();
+      render(<TaskModal {...defaultProps} onUpdateTask={onUpdateTask} />);
+
+      const typeButton = screen.getByRole('button', { name: /set type/i });
+      fireEvent.click(typeButton);
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { type: 'epic' });
+    });
+
+    it('cycles type from epic to story when clicked', () => {
+      const onUpdateTask = vi.fn();
+      const task = { ...baseTask, type: 'epic' as const };
+      render(<TaskModal {...defaultProps} task={task} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Epic'));
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { type: 'story' });
+    });
+
+    it('cycles type from story to task when clicked', () => {
+      const onUpdateTask = vi.fn();
+      const task = { ...baseTask, type: 'story' as const };
+      render(<TaskModal {...defaultProps} task={task} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Story'));
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { type: 'task' });
+    });
+
+    it('cycles type from task to spike when clicked', () => {
+      const onUpdateTask = vi.fn();
+      const task = { ...baseTask, type: 'task' as const };
+      render(<TaskModal {...defaultProps} task={task} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Task'));
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { type: 'spike' });
+    });
+
+    it('cycles type from spike to undefined when clicked', () => {
+      const onUpdateTask = vi.fn();
+      const task = { ...baseTask, type: 'spike' as const };
+      render(<TaskModal {...defaultProps} task={task} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Spike'));
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { type: undefined });
+    });
+  });
+
   describe('Priority cycling', () => {
     it('cycles priority from undefined to low when clicked', () => {
       const onUpdateTask = vi.fn();
@@ -261,6 +313,16 @@ describe('TaskModal', () => {
 
       const addButton = screen.getByRole('button', { name: /add step/i });
       fireEvent.click(addButton);
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call onClose when clicking type badge', () => {
+      const onClose = vi.fn();
+      const task = { ...baseTask, type: 'story' as const };
+      render(<TaskModal {...defaultProps} task={task} onClose={onClose} />);
+
+      fireEvent.click(screen.getByText('Story'));
 
       expect(onClose).not.toHaveBeenCalled();
     });

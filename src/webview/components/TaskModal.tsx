@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { KanbanTask } from '../types/kanban';
+import { TASK_TYPE_LABELS, nextTaskType } from '../utils/taskType';
 
 interface TaskModalProps {
   task: KanbanTask;
@@ -89,6 +90,11 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
     onUpdateTask(task.id, { priority: PRIORITY_CYCLE[nextIndex] });
   };
 
+  const cycleType = () => {
+    if (!onUpdateTask) return;
+    onUpdateTask(task.id, { type: nextTaskType(task.type) });
+  };
+
   const cycleWorkload = () => {
     if (!onUpdateTask) return;
     const currentIndex = WORKLOAD_CYCLE.indexOf(task.workload as Workload);
@@ -155,6 +161,38 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
   const stopProp = {
     onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
     onMouseDown: (e: React.MouseEvent) => e.stopPropagation(),
+  };
+
+  const getTypeBadge = (type?: KanbanTask['type']) => {
+    const styles = {
+      epic: 'border border-vscode-info text-vscode-info',
+      story: 'border border-vscode-primary text-vscode-primary',
+      task: 'border border-vscode-success text-vscode-success',
+      spike: 'border border-vscode-warning text-vscode-warning',
+    };
+
+    if (!type) {
+      return (
+        <button
+          onClick={cycleType}
+          {...stopProp}
+          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border border-dashed border-vscode-input-border text-vscode-foreground opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+          aria-label="Set type"
+        >
+          + Type
+        </button>
+      );
+    }
+
+    return (
+      <button
+        onClick={cycleType}
+        {...stopProp}
+        className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded cursor-pointer hover:opacity-80 transition-opacity ${styles[type]}`}
+      >
+        {TASK_TYPE_LABELS[type]}
+      </button>
+    );
   };
 
   const getPriorityBadge = (priority?: string) => {
@@ -305,6 +343,7 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
 
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mt-3">
+            {getTypeBadge(task.type)}
             {getPriorityBadge(task.priority)}
             {getWorkloadBadge(task.workload)}
           </div>
