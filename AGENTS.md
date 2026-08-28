@@ -321,3 +321,14 @@ npm run test:unit:watch # Testes em watch mode
 npm run check-types    # Type checking
 npm run lint           # ESLint
 ```
+
+---
+
+## Ferramentas Externas
+
+Ferramentas fora deste repositório que dependem do formato de board
+(`mng/*.kanban.md`) estão documentadas em `docs/agents/`:
+
+- [`docs/agents/kanban-task-skill-EN.md`](docs/agents/kanban-task-skill-EN.md) /
+  [`-ES.md`](docs/agents/kanban-task-skill-ES.md) — skill de Claude
+  Code que adiciona tarefas a um board via linguagem natural.
