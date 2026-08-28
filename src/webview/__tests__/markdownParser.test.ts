@@ -214,6 +214,63 @@ describe('MarkdownKanbanParser', () => {
     });
   });
 
+  describe('parseMarkdown - Origin', () => {
+    it('parses an origin property', () => {
+      const markdown = `# Board
+
+## Esta semana
+
+### Validate triple version
+  - origin: luis.jobs/anfora
+
+### House chore
+  - origin: hogar/casa
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      expect(board.columns[0].tasks[0].origin).toBe('luis.jobs/anfora');
+      expect(board.columns[0].tasks[1].origin).toBe('hogar/casa');
+    });
+
+    it('leaves origin undefined when not set', () => {
+      const markdown = `# Board
+
+## Backlog
+
+### Native card
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      expect(board.columns[0].tasks[0].origin).toBeUndefined();
+    });
+
+    it('does not treat an origin line as a new task title', () => {
+      const markdown = `# Board
+
+## Esta semana
+
+### Promoted card
+  - origin: luis.jobs/anfora
+  - priority: high
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      expect(board.columns[0].tasks).toHaveLength(1);
+      expect(board.columns[0].tasks[0].priority).toBe('high');
+    });
+
+    it('round-trips origin through generateMarkdown', () => {
+      const markdown = `# Board
+
+## Esta semana
+
+### Promoted card
+  - origin: luis.jobs/anfora
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(markdown);
+      const regenerated = MarkdownKanbanParser.generateMarkdown(board);
+      const reparsed = MarkdownKanbanParser.parseMarkdown(regenerated);
+      expect(reparsed.columns[0].tasks[0].origin).toBe('luis.jobs/anfora');
+    });
+  });
+
   describe('parseMarkdown - Tags', () => {
     it('parses inline hashtag tags', () => {
       const markdown = `# Board

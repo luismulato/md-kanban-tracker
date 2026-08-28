@@ -273,6 +273,14 @@ Task description here
 | `due` | `YYYY-MM-DD` | `due: 2024-12-31` |
 | `defaultExpanded` | `true`, `false` | `defaultExpanded: true` |
 | `tags` | Array or hashtags | `[ui, design]` or `#ui #design` |
+| `type` | `epic`, `story`, `task`, `spike` | `type: story` |
+| `owner` | free string (defaults to `Luis`) | `owner: Claude` |
+| `origin` | free string — provenance marker for a card promoted from another board | `origin: luis.jobs/anfora` |
+
+`owner` and `origin` are markdown-only (no UI to set them yet). `origin` is
+meant for aggregator boards such as a weekly planner: it records the
+`<domain>/<project>` a card was pulled from. On a project's own board you
+leave it unset — the origin is implicitly that project.
 
 ---
 

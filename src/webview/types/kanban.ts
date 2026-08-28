@@ -7,6 +7,8 @@ export interface KanbanTask {
   tags?: string[];
   type?: TaskType;
   owner?: string;
+  /** Provenance marker `<domain>/<project>` on aggregator boards; unset on a project's own board. */
+  origin?: string;
   priority?: 'low' | 'medium' | 'high';
   workload?: 'Easy' | 'Normal' | 'Hard' | 'Extreme';
   dueDate?: string;

@@ -7,6 +7,10 @@ export interface KanbanTask {
   tags?: string[];
   type?: TaskType;
   owner?: string;
+  /** Provenance marker: `<domain>/<project>` the card was promoted from.
+   *  Only set on aggregator boards (e.g. a weekly planner); unset on a
+   *  project's own board, where the origin is implicitly that project. */
+  origin?: string;
   priority?: 'low' | 'medium' | 'high';
   workload?: 'Easy' | 'Normal' | 'Hard' | 'Extreme';
   dueDate?: string;
@@ -192,7 +196,7 @@ export class MarkdownKanbanParser {
 
   private static isTaskTitle(line: string, trimmedLine: string): boolean {
     // Exclude property lines (any indented line with property pattern)
-    if (trimmedLine.match(/^- (due|tags|type|owner|priority|workload|steps|defaultExpanded):/)) {
+    if (trimmedLine.match(/^- (due|tags|type|owner|origin|priority|workload|steps|defaultExpanded):/)) {
       return false;
     }
 
@@ -232,7 +236,7 @@ export class MarkdownKanbanParser {
 
   private static parseTaskProperty(line: string, task: KanbanTask): boolean {
     // flexible regex: accept any amount of leading whitespace (0+) to support formatted markdown
-    const propertyMatch = line.match(/^\s*- (due|tags|type|owner|priority|workload|steps|defaultExpanded):\s*(.*)$/);
+    const propertyMatch = line.match(/^\s*- (due|tags|type|owner|origin|priority|workload|steps|defaultExpanded):\s*(.*)$/);
     if (!propertyMatch) return false;
 
     const [, propertyName, propertyValue] = propertyMatch;
@@ -249,6 +253,9 @@ export class MarkdownKanbanParser {
         break;
       case 'owner':
         task.owner = value;
+        break;
+      case 'origin':
+        task.origin = value;
         break;
       case 'tags':
         const tagsMatch = value.match(/\[(.*)\]/);
@@ -348,6 +355,9 @@ export class MarkdownKanbanParser {
     let properties = '';
 
     // generate without indentation for formatter compatibility
+    if (task.origin) {
+      properties += `- origin: ${task.origin}\n`;
+    }
     if (task.type) {
       properties += `- type: ${task.type}\n`;
     }

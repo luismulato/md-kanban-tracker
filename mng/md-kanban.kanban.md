@@ -13,11 +13,42 @@
     Y dentro del as columnas.
     ```
 
+### Botón "+" para agregar tarjeta en cada columna, y borde sutil de columna para destacarla
+
+    ```md
+    Referencia visual: ![ref](assets/ref-columna-borde-boton-plus.png)
+
+    Dos cambios sobre las columnas del board, inspirados en la imagen:
+
+    - Botón "+" junto al título de la columna (o al pie, tipo
+      "+ New page" de Notion) para agregar una tarjeta a esa columna
+      sin editar el markdown a mano.
+    - Borde sutil alrededor de la columna para destacarla —
+      redondeado, de bajo contraste, como el de la referencia.
+    ```
+
+### Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)
+
 ## To Do
 
 ## WIP
 
 ## Done
+
+### Propiedad `origin` en las tarjetas (marca de procedencia)
+
+- tags: [story]
+    ```md
+    Las tarjetas pueden llevar `- origin: <dominio>/<proyecto>`. Registra
+    de dónde se promovió una card, para boards agregadores (un
+    planificador semanal que junta cards de varios backlogs en un solo
+    board). En el board propio de un proyecto se deja sin setear.
+
+    Solo markdown por ahora (sin UI), igual que `owner`. Parseada,
+    serializada primera entre las propiedades, round-trip limpio.
+    De paso se documentaron en el README las propiedades `type` y
+    `owner`, que estaban sin documentar. Pedido por el proyecto Kairos.
+    ```
 
 ### Cuando edita una tarjeta y da enter debe cerrarla
 

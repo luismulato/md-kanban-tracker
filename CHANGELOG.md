@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Features
+
+- **Task origin marker**: cards can now carry an `- origin: <domain>/<project>` markdown property. It records where a card was promoted from, for aggregator boards such as a weekly planner that pulls cards out of several project backlogs into one board. On a project's own board you leave it unset — the origin is implicitly that project. Markdown-only for now (no UI to set it), same as `owner`. Parsed, serialized first among the task properties, and round-trips cleanly. Also documents the previously-undocumented `type` and `owner` properties in the README attribute table.
+
 ## [0.2.0] - 2026-08-25
 
 ### Features
