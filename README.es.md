@@ -273,7 +273,7 @@ Task description here
 | `due` | `YYYY-MM-DD` | `due: 2024-12-31` |
 | `defaultExpanded` | `true`, `false` | `defaultExpanded: true` |
 | `tags` | Array o hashtags | `[ui, design]` o `#ui #design` |
-| `type` | `epic`, `story`, `task`, `spike` | `type: story` |
+| `type` | `epic`, `story`, `task`, `spike`, `bug` | `type: bug` |
 | `owner` | string libre (por defecto `Luis`) | `owner: Claude` |
 | `origin` | string libre — marca de procedencia de una card promovida desde otro board | `origin: luis.jobs/anfora` |
 

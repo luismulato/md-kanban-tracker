@@ -170,6 +170,7 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
       story: 'border border-vscode-primary text-vscode-primary',
       task: 'border border-vscode-success text-vscode-success',
       spike: 'border border-vscode-warning text-vscode-warning',
+      bug: 'border border-vscode-error text-vscode-error',
     };
 
     if (!type) {

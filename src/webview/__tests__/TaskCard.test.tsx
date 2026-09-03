@@ -63,6 +63,7 @@ describe('TaskCard', () => {
         ['story', 'Story'],
         ['task', 'Task'],
         ['spike', 'Spike'],
+        ['bug', 'Bug'],
       ] as const;
 
       for (const [type, label] of types) {
@@ -85,7 +86,8 @@ describe('TaskCard', () => {
       ['epic', 'Epic', 'story'],
       ['story', 'Story', 'task'],
       ['task', 'Task', 'spike'],
-      ['spike', 'Spike', undefined],
+      ['spike', 'Spike', 'bug'],
+      ['bug', 'Bug', undefined],
     ];
 
     it.each(transitions)('clicking the %s badge sets the next type in the cycle', (current, label, expectedNext) => {

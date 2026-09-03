@@ -2,13 +2,14 @@ import type { TaskType } from '../types/kanban';
 import type { BadgeVariant } from '../components/atoms/Badge';
 
 // undefined first so cycling through types can also clear it
-export const TASK_TYPE_CYCLE: Array<TaskType | undefined> = [undefined, 'epic', 'story', 'task', 'spike'];
+export const TASK_TYPE_CYCLE: Array<TaskType | undefined> = [undefined, 'epic', 'story', 'task', 'spike', 'bug'];
 
 export const TASK_TYPE_LABELS: Record<TaskType, string> = {
   epic: 'Epic',
   story: 'Story',
   task: 'Task',
   spike: 'Spike',
+  bug: 'Bug',
 };
 
 export const TASK_TYPE_BADGE_VARIANT: Record<TaskType, BadgeVariant> = {
@@ -16,6 +17,7 @@ export const TASK_TYPE_BADGE_VARIANT: Record<TaskType, BadgeVariant> = {
   story: 'default',
   task: 'success',
   spike: 'warning',
+  bug: 'error',
 };
 
 export function nextTaskType(current: TaskType | undefined): TaskType | undefined {

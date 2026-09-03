@@ -1,4 +1,4 @@
-export type TaskType = 'epic' | 'story' | 'task' | 'spike';
+export type TaskType = 'epic' | 'story' | 'task' | 'spike' | 'bug';
 
 export interface KanbanTask {
   id: string;
@@ -266,7 +266,7 @@ export class MarkdownKanbanParser {
         task.dueDate = value;
         break;
       case 'type':
-        if (['epic', 'story', 'task', 'spike'].includes(value)) {
+        if (['epic', 'story', 'task', 'spike', 'bug'].includes(value)) {
           task.type = value as TaskType;
         }
         break;

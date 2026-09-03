@@ -231,12 +231,16 @@ describe('MarkdownKanbanParser', () => {
 
 ### A Spike
   - type: spike
+
+### A Bug
+  - type: bug
 `;
       const board = MarkdownKanbanParser.parseMarkdown(markdown);
       expect(board.columns[0].tasks[0].type).toBe('epic');
       expect(board.columns[0].tasks[1].type).toBe('story');
       expect(board.columns[0].tasks[2].type).toBe('task');
       expect(board.columns[0].tasks[3].type).toBe('spike');
+      expect(board.columns[0].tasks[4].type).toBe('bug');
     });
 
     it('ignores an invalid type value', () => {

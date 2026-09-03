@@ -43,40 +43,6 @@
 
 ## To Do
 
-### Al dar enter al agregar una suptask debe aceptarla y crear un nuevo subtask para estar listo para escribir.
-
-
-### Agregar tipo bug
-
-    ```md
-    En la vista del kanban que se pueda agregar un nuevo tipo: bug
-    ```
-
-### Rotar tipos de tarjetas en kanban
-
-    ```md
-    En la vista kanban, al dar click en type empieza a circular la lista de tipos, cuando llega al último y le doy click debería volver a salir el primero y seguir así.
-    ```
-
-## WIP
-
-## Done
-
-### Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)
-
-    ```md
-    El contador de tarjetas junto al título de columna ya existía; el
-    botón "+ Add card" también, pero estaba siempre visible (sutil) al
-    pie. Ahora es estilo Notion: aparece solo mientras el puntero está
-    sobre la columna. El área vacía de la columna sigue abriendo el
-    mismo editor, así que el botón no es la única vía.
-    
-    Cambio en Column.tsx (render condicional por isHovered) + testids
-    column-<id> y column-count-<id>. Ciclo ATDD+TDD:
-    docs/features/hover-add-card-button.feature +
-    src/webview/__tests__/Column.test.tsx (4 casos nuevos).
-    ```
-
 ### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
 
     ```md
@@ -102,12 +68,12 @@
     timer de WIP); como el fingerprint cambiaba siempre, el webview
     reemplazaba el board entero y React remontaba todas las tarjetas —
     matando el menú contextual abierto (y el hover / edición en curso).
-
+    
     Fix: ids deterministas en el parser (hash de título de
     columna/tarjeta + nº de ocurrencia). Un reparseo sin cambios ahora
     matchea el fingerprint y syncFromBackend corta antes. Tarjetas con
     el mismo título siguen recibiendo ids distintos.
-
+    
     Ciclo ATDD+TDD: docs/features/context-menu-survives-sync.feature,
     src/webview/__tests__/contextMenuPersistence.test.tsx (2 casos,
     rojos antes / verdes después) + bloque "Deterministic ids" en
@@ -116,15 +82,72 @@
 
 ### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"
 
-- type: spike
+- type: story
     ```md
     El click derecho no hace nada.
-
+    
     Mismo bug que "no encuentro la opción move on top" — el menú abría
     pero se desmontaba al instante porque el parser regeneraba ids
     random en cada parseo y la extensión reenvía el board seguido,
     forzando un remount de todas las tarjetas. Arreglado con ids
     deterministas en el parser (ver esa tarjeta para el detalle).
+    ```
+
+### Al dar enter al agregar una suptask debe aceptarla y crear un nuevo subtask para estar listo para escribir.
+
+
+### Rotar tipos de tarjetas en kanban
+
+    ```md
+    En la vista kanban, al dar click en type empieza a circular la lista de tipos, cuando llega al último y le doy click debería volver a salir el primero y seguir así.
+    ```
+
+### Cambiar columna a la que pertenece una tarjeta dentro de la edición de la misma
+
+
+### Dejar configurable el color de los tipos de tarjeta
+
+    ```md
+    crear una boton de tuerca (tipo config) que despliega menu de configuaracion.
+    Ahí despliega opción de personalizar colores de tipo de tarjeta:
+    Agrega por defecto colores distintos para cada tipo.
+    Ubica el botón donde sea más adecuado para este tipo de plugin.
+    ```
+
+## WIP
+
+## Done
+
+### Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)
+
+    ```md
+    El contador de tarjetas junto al título de columna ya existía; el
+    botón "+ Add card" también, pero estaba siempre visible (sutil) al
+    pie. Ahora es estilo Notion: aparece solo mientras el puntero está
+    sobre la columna. El área vacía de la columna sigue abriendo el
+    mismo editor, así que el botón no es la única vía.
+    
+    Cambio en Column.tsx (render condicional por isHovered) + testids
+    column-<id> y column-count-<id>. Ciclo ATDD+TDD:
+    docs/features/hover-add-card-button.feature +
+    src/webview/__tests__/Column.test.tsx (4 casos nuevos).
+    ```
+
+### Agregar tipo bug
+
+    ```md
+    En la vista del kanban que se pueda agregar un nuevo tipo: bug
+
+    Se agregó `bug` como quinto tipo de tarjeta (epic/story/task/spike/bug).
+    Se setea con `- type: bug` en el markdown o clickeando el badge: el
+    ciclo ahora es epic -> story -> task -> spike -> bug -> (sin tipo),
+    en la tarjeta y en el modal. Badge rojo ("Bug").
+
+    Ciclo ATDD+TDD: docs/features/bug-task-type.feature +
+    src/webview/__tests__/bugTaskType.test.tsx (5 casos). Implementación
+    en markdownParser.ts, webview/types/kanban.ts, webview/utils/taskType.ts
+    y TaskModal.tsx. Fuera de alcance: color de tipo configurable (tarjeta
+    aparte en To Do).
     ```
 
 ## Done Done

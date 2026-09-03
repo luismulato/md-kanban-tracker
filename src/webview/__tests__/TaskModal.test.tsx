@@ -61,12 +61,22 @@ describe('TaskModal', () => {
       expect(onUpdateTask).toHaveBeenCalledWith('1', { type: 'spike' });
     });
 
-    it('cycles type from spike to undefined when clicked', () => {
+    it('cycles type from spike to bug when clicked', () => {
       const onUpdateTask = vi.fn();
       const task = { ...baseTask, type: 'spike' as const };
       render(<TaskModal {...defaultProps} task={task} onUpdateTask={onUpdateTask} />);
 
       fireEvent.click(screen.getByText('Spike'));
+
+      expect(onUpdateTask).toHaveBeenCalledWith('1', { type: 'bug' });
+    });
+
+    it('cycles type from bug to undefined when clicked', () => {
+      const onUpdateTask = vi.fn();
+      const task = { ...baseTask, type: 'bug' as const };
+      render(<TaskModal {...defaultProps} task={task} onUpdateTask={onUpdateTask} />);
+
+      fireEvent.click(screen.getByText('Bug'));
 
       expect(onUpdateTask).toHaveBeenCalledWith('1', { type: undefined });
     });

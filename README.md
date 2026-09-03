@@ -275,7 +275,7 @@ Task description here
 | `due` | `YYYY-MM-DD` | `due: 2024-12-31` |
 | `defaultExpanded` | `true`, `false` | `defaultExpanded: true` |
 | `tags` | Array or hashtags | `[ui, design]` or `#ui #design` |
-| `type` | `epic`, `story`, `task`, `spike` | `type: story` |
+| `type` | `epic`, `story`, `task`, `spike`, `bug` | `type: bug` |
 | `owner` | free string (defaults to `Luis`) | `owner: Claude` |
 | `origin` | free string — provenance marker for a card promoted from another board | `origin: luis.jobs/anfora` |
 

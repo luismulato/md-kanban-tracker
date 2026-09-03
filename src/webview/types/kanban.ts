@@ -1,4 +1,4 @@
-export type TaskType = 'epic' | 'story' | 'task' | 'spike';
+export type TaskType = 'epic' | 'story' | 'task' | 'spike' | 'bug';
 
 export interface KanbanTask {
   id: string;
