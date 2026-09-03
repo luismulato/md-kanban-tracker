@@ -45,6 +45,7 @@
 
 ### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
 
+- type: story
     ```md
     Si es un bug, registralo aquí, y realiza el ciclo tdd, atdd, y deja lista la versión para desplegar.
     
@@ -82,7 +83,7 @@
 
 ### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"
 
-- type: story
+- type: spike
     ```md
     El click derecho no hace nada.
     
