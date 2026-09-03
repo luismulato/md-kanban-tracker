@@ -39,19 +39,41 @@
 
 ## To Do
 
-### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
-
-    ```md
-    Si es un bug, registralo aquí, y realiza el ciclo tdd, atdd, y deja lista la versión para desplegar.
-    ```
-
 ### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"
 
     ```md
     El click derecho no hace nada.
     ```
 
+### Al dar enter al agregar una suptask debe aceptarla y crear un nuevo subtask para estar listo para escribir.
+
+
 ## WIP
+
+### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
+
+    ```md
+    Si es un bug, registralo aquí, y realiza el ciclo tdd, atdd, y deja lista la versión para desplegar.
+
+    --- Investigación 2026-09-03 (md-kanban-run) ---
+    La opción existe: "Move to top" en el menú contextual de la tarjeta
+    (click derecho) — TaskContextMenu.tsx, cableado en SortableTask.tsx
+    (handleContextMenu -> setContextMenuPos). moveTaskToTop está en el
+    store y tiene tests.
+
+    NO se pudo reproducir "el click derecho no hace nada" en el harness:
+    fireEvent.contextMenu abre el menú tanto con dnd-kit mockeado como
+    real, con secuencia completa de punteros, y tras un press previo.
+    253 tests en verde, incluidos los del menú (SortableTask.test.tsx).
+
+    => Apunta a un problema propio del webview de VSCode en runtime (no
+    reproducible desde jsdom) o a que se hace click derecho sobre el
+    hueco entre tarjetas, no sobre la tarjeta. Falta repro en vivo:
+    abrir "Developer: Open Webview Developer Tools", click derecho sobre
+    una tarjeta y ver si el evento contextmenu dispara y si el <div
+    role="menu"> aparece en el DOM (para separar CSS/stacking de evento).
+    Bloqueada hasta tener esa info.
+    ```
 
 ## Done
 
@@ -63,7 +85,7 @@
     pie. Ahora es estilo Notion: aparece solo mientras el puntero está
     sobre la columna. El área vacía de la columna sigue abriendo el
     mismo editor, así que el botón no es la única vía.
-
+    
     Cambio en Column.tsx (render condicional por isHovered) + testids
     column-<id> y column-count-<id>. Ciclo ATDD+TDD:
     docs/features/hover-add-card-button.feature +
