@@ -85,6 +85,101 @@ describe('MarkdownKanbanParser', () => {
     });
   });
 
+  describe('parseMarkdown - Deterministic ids', () => {
+    const sample = `# Board
+
+## To Do
+
+### Alpha
+  - priority: high
+
+### Beta
+
+## WIP
+
+### Alpha
+`;
+
+    it('gives identical ids when the same markdown is parsed twice', () => {
+      const a = MarkdownKanbanParser.parseMarkdown(sample);
+      const b = MarkdownKanbanParser.parseMarkdown(sample);
+
+      expect(a.columns.map(c => c.id)).toEqual(b.columns.map(c => c.id));
+      expect(a.columns.map(c => c.tasks.map(t => t.id))).toEqual(
+        b.columns.map(c => c.tasks.map(t => t.id)),
+      );
+    });
+
+    it('produces a stable board fingerprint across re-parses', () => {
+      const fp = (md: string) =>
+        MarkdownKanbanParser.parseMarkdown(md)
+          .columns.map(c => `${c.id}:[${c.tasks.map(t => t.id).join(',')}]`)
+          .join('|');
+
+      expect(fp(sample)).toBe(fp(sample));
+    });
+
+    it('gives distinct ids to same-titled cards in the same column', () => {
+      const md = `# B
+
+## To Do
+
+### Same
+
+### Same
+`;
+      const board = MarkdownKanbanParser.parseMarkdown(md);
+      const [t1, t2] = board.columns[0].tasks;
+      expect(t1.id).not.toBe(t2.id);
+    });
+
+    it('gives distinct ids to same-titled cards across different columns', () => {
+      const board = MarkdownKanbanParser.parseMarkdown(sample);
+      const todoAlpha = board.columns[0].tasks[0];
+      const wipAlpha = board.columns[1].tasks[0];
+      expect(todoAlpha.title).toBe(wipAlpha.title);
+      expect(todoAlpha.id).not.toBe(wipAlpha.id);
+    });
+
+    it('keeps other cards ids stable when one card title changes', () => {
+      const before = MarkdownKanbanParser.parseMarkdown(sample);
+      const after = MarkdownKanbanParser.parseMarkdown(
+        sample.replace('### Beta', '### Beta renamed'),
+      );
+
+      const betaBefore = before.columns[0].tasks[1].id;
+      const betaAfter = after.columns[0].tasks[1].id;
+      expect(betaAfter).not.toBe(betaBefore); // the renamed card's id may change
+
+      // ...but Alpha, untouched, keeps its id
+      expect(after.columns[0].tasks[0].id).toBe(before.columns[0].tasks[0].id);
+      expect(after.columns[1].tasks[0].id).toBe(before.columns[1].tasks[0].id);
+    });
+
+    it('keeps ids stable when columns are reordered', () => {
+      const reordered = `# Board
+
+## WIP
+
+### Alpha
+
+## To Do
+
+### Alpha
+  - priority: high
+
+### Beta
+`;
+      const original = MarkdownKanbanParser.parseMarkdown(sample);
+      const moved = MarkdownKanbanParser.parseMarkdown(reordered);
+
+      const todoOrig = original.columns.find(c => c.title === 'To Do')!;
+      const todoMoved = moved.columns.find(c => c.title === 'To Do')!;
+      expect(todoMoved.id).toBe(todoOrig.id);
+      expect(todoMoved.tasks.map(t => t.id)).toEqual(todoOrig.tasks.map(t => t.id));
+    });
+  });
+
   describe('parseMarkdown - Priority', () => {
     it('parses structured priority format', () => {
       const markdown = `# Board

@@ -5,3 +5,4 @@
 2026-08-25 03:23–03:25 (3m) — "Agregar type a las tarjetas: epic, story, task, spike" (auto, cambio de foco en WIP)
 2026-08-25 03:27–03:29 (2m) — "Cambiar tipo de tarjeta con un click, rotativo (epic,story,task, spike)" (auto, cambio de foco en WIP)
 2026-09-03 07:00–07:07 (7m) — "Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)" (auto, cambio de foco en WIP)
+2026-09-03 07:22–07:40 (18m) — "no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug" (auto, cambio de foco en WIP)

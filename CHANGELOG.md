@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2026-09-03
 
+### Bug Fixes
+
+- **Card context menu (and hover state) no longer vanishes**: right-clicking a card sometimes did nothing because the parser assigned a fresh random id to every column and task on each parse. The extension re-parses and re-pushes the board on all kinds of unrelated triggers (file touched on disk, editor focus, WIP timer), and since the board fingerprint changed every time, the webview replaced the whole board and React remounted every card — tearing down any open context menu or in-progress hover/edit. Parsed ids are now deterministic (derived from column/task title + occurrence), so a no-op re-parse matches the fingerprint and the sync is skipped. Same-titled cards still get distinct ids.
+
 ### Features
 
 - **Hover-only "+ Add card" button**: each column's "+ Add card" button is now hidden until the pointer is over that column (Notion-style), instead of always sitting at the footer in a dim state. The task counter next to the column title is unchanged — always visible. Clicking the column's empty area still opens the same new-note editor, so the button isn't the only way in.

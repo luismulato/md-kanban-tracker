@@ -2,6 +2,10 @@
 
 ## Backlog
 
+### Agregar drag handler en substasks al editar una tarjeta
+
+- type: story
+
 ### Versión web del board (para verlo desde el celular sin VSCode)
 
 - tags: [epic]
@@ -39,41 +43,22 @@
 
 ## To Do
 
-### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"
-
-    ```md
-    El click derecho no hace nada.
-    ```
-
 ### Al dar enter al agregar una suptask debe aceptarla y crear un nuevo subtask para estar listo para escribir.
 
 
-## WIP
-
-### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
+### Agregar tipo bug
 
     ```md
-    Si es un bug, registralo aquí, y realiza el ciclo tdd, atdd, y deja lista la versión para desplegar.
-
-    --- Investigación 2026-09-03 (md-kanban-run) ---
-    La opción existe: "Move to top" en el menú contextual de la tarjeta
-    (click derecho) — TaskContextMenu.tsx, cableado en SortableTask.tsx
-    (handleContextMenu -> setContextMenuPos). moveTaskToTop está en el
-    store y tiene tests.
-
-    NO se pudo reproducir "el click derecho no hace nada" en el harness:
-    fireEvent.contextMenu abre el menú tanto con dnd-kit mockeado como
-    real, con secuencia completa de punteros, y tras un press previo.
-    253 tests en verde, incluidos los del menú (SortableTask.test.tsx).
-
-    => Apunta a un problema propio del webview de VSCode en runtime (no
-    reproducible desde jsdom) o a que se hace click derecho sobre el
-    hueco entre tarjetas, no sobre la tarjeta. Falta repro en vivo:
-    abrir "Developer: Open Webview Developer Tools", click derecho sobre
-    una tarjeta y ver si el evento contextmenu dispara y si el <div
-    role="menu"> aparece en el DOM (para separar CSS/stacking de evento).
-    Bloqueada hasta tener esa info.
+    En la vista del kanban que se pueda agregar un nuevo tipo: bug
     ```
+
+### Rotar tipos de tarjetas en kanban
+
+    ```md
+    En la vista kanban, al dar click en type empieza a circular la lista de tipos, cuando llega al último y le doy click debería volver a salir el primero y seguir así.
+    ```
+
+## WIP
 
 ## Done
 
@@ -90,6 +75,56 @@
     column-<id> y column-count-<id>. Ciclo ATDD+TDD:
     docs/features/hover-add-card-button.feature +
     src/webview/__tests__/Column.test.tsx (4 casos nuevos).
+    ```
+
+### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
+
+    ```md
+    Si es un bug, registralo aquí, y realiza el ciclo tdd, atdd, y deja lista la versión para desplegar.
+    
+    --- Investigación 2026-09-03 (md-kanban-run) ---
+    La opción existe: "Move to top" en el menú contextual de la tarjeta
+    (click derecho) — TaskContextMenu.tsx, cableado en SortableTask.tsx
+    (handleContextMenu -> setContextMenuPos). moveTaskToTop está en el
+    store y tiene tests.
+    
+    NO se pudo reproducir "el click derecho no hace nada" en el harness:
+    fireEvent.contextMenu abre el menú tanto con dnd-kit mockeado como
+    real, con secuencia completa de punteros, y tras un press previo.
+    253 tests en verde, incluidos los del menú (SortableTask.test.tsx).
+    
+    --- Causa raíz encontrada (pista del usuario: click derecho sobre la
+    columna sí da menú nativo, sobre la tarjeta no) ---
+    El menú SÍ abría, pero se desmontaba al instante. El parser le
+    asignaba un id random (Math.random) a cada columna y tarjeta en cada
+    parseo. La extensión reparsea y reenvía el board ante cualquier
+    disparador no relacionado (archivo tocado en disco, foco del editor,
+    timer de WIP); como el fingerprint cambiaba siempre, el webview
+    reemplazaba el board entero y React remontaba todas las tarjetas —
+    matando el menú contextual abierto (y el hover / edición en curso).
+
+    Fix: ids deterministas en el parser (hash de título de
+    columna/tarjeta + nº de ocurrencia). Un reparseo sin cambios ahora
+    matchea el fingerprint y syncFromBackend corta antes. Tarjetas con
+    el mismo título siguen recibiendo ids distintos.
+
+    Ciclo ATDD+TDD: docs/features/context-menu-survives-sync.feature,
+    src/webview/__tests__/contextMenuPersistence.test.tsx (2 casos,
+    rojos antes / verdes después) + bloque "Deterministic ids" en
+    markdownParser.test.ts. 261 tests en verde.
+    ```
+
+### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"
+
+- type: spike
+    ```md
+    El click derecho no hace nada.
+
+    Mismo bug que "no encuentro la opción move on top" — el menú abría
+    pero se desmontaba al instante porque el parser regeneraba ids
+    random en cada parseo y la extensión reenvía el board seguido,
+    forzando un remount de todas las tarjetas. Arreglado con ids
+    deterministas en el parser (ver esa tarjeta para el detalle).
     ```
 
 ## Done Done

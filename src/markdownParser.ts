@@ -32,8 +32,16 @@ export interface KanbanBoard {
 }
 
 export class MarkdownKanbanParser {
-  private static generateId(): string {
-    return Math.random().toString(36).substr(2, 9);
+  // deterministic id from content, so re-parsing identical markdown yields
+  // identical ids — stable React keys and a stable board fingerprint, which
+  // stops the webview from remounting every card on unrelated file syncs
+  // (that remount is what makes an open context menu / hover state vanish).
+  private static hashId(prefix: string, key: string): string {
+    let h = 5381;
+    for (let i = 0; i < key.length; i++) {
+      h = (((h << 5) + h) + key.charCodeAt(i)) | 0;
+    }
+    return `${prefix}-${(h >>> 0).toString(36)}`;
   }
 
   static parseMarkdown(content: string): KanbanBoard {
@@ -48,6 +56,10 @@ export class MarkdownKanbanParser {
     let inTaskProperties = false;
     let inTaskDescription = false;
     let inCodeBlock = false;
+
+    // occurrence counters disambiguate columns/tasks that share a title
+    const columnOccurrences = new Map<string, number>();
+    const taskOccurrences = new Map<string, number>();
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -105,8 +117,11 @@ export class MarkdownKanbanParser {
           columnTitle = columnTitle.replace(/\s*\[Archived\]$/, '').trim();
         }
         
+        const columnOccurrence = columnOccurrences.get(columnTitle) ?? 0;
+        columnOccurrences.set(columnTitle, columnOccurrence + 1);
+
         currentColumn = {
-          id: this.generateId(),
+          id: this.hashId('col', `${columnOccurrence}\n${columnTitle}`),
           title: columnTitle,
           tasks: [],
           archived: isArchived
@@ -133,8 +148,12 @@ export class MarkdownKanbanParser {
             }
           }
 
+          const taskKey = `${currentColumn.title}\n${taskTitle}`;
+          const taskOccurrence = taskOccurrences.get(taskKey) ?? 0;
+          taskOccurrences.set(taskKey, taskOccurrence + 1);
+
           currentTask = {
-            id: this.generateId(),
+            id: this.hashId('task', `${currentColumn.title}\n${taskOccurrence}\n${taskTitle}`),
             title: taskTitle,
             description: '',
             tags: []
