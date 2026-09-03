@@ -114,6 +114,22 @@
     Ubica el botón donde sea más adecuado para este tipo de plugin.
     ```
 
+### En editar tarjeta Definir tiempo estimado, ejecutado, restante
+
+    ```md
+    Al editar al nivel de type, priority y workload, 
+    Estimado, ejecutado, restante.
+    Restricciones:
+    - toda la interfaz en ingles.
+    ```
+
+### Eliminar tarjeta
+
+    ```md
+    En vista kanban, click derecho y opcion de menu eliminar.
+    O al hacer rollover sobre la tarjeta activa boton X para eliminar
+    ```
+
 ## WIP
 
 ## Done
@@ -137,12 +153,12 @@
 
     ```md
     En la vista del kanban que se pueda agregar un nuevo tipo: bug
-
+    
     Se agregó `bug` como quinto tipo de tarjeta (epic/story/task/spike/bug).
     Se setea con `- type: bug` en el markdown o clickeando el badge: el
     ciclo ahora es epic -> story -> task -> spike -> bug -> (sin tipo),
     en la tarjeta y en el modal. Badge rojo ("Bug").
-
+    
     Ciclo ATDD+TDD: docs/features/bug-task-type.feature +
     src/webview/__tests__/bugTaskType.test.tsx (5 casos). Implementación
     en markdownParser.ts, webview/types/kanban.ts, webview/utils/taskType.ts
