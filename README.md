@@ -38,6 +38,7 @@ Built with modern technologies (React 19, TypeScript 5.9, Vite 7) and designed t
 - **Daily Done archiving**: the first time a task enters `WIP` each day, everything sitting in `Done` moves to the end of `Done Done`, so `Done` only ever shows what was finished today.
 - **WIP-synced timer**: moving a task into WIP starts a timer for it automatically; moving it out stops the timer and appends a line to a per-board `.timelog.md` file. Switching focus (one task leaves WIP, another enters) stops the old timer and starts the new one in a single step. A manually-started timer for something that isn't in WIP is never touched by this.
 - **Companion folder**: the first time you open a `.kanban.md` file, a `md-kanban-tracker/` folder appears next to it with the timelog, a usage guide, and a short readme — all generated automatically, nothing to set up.
+- **Skeleton on first open**: opening an empty `.kanban.md` seeds it with the five standard columns (`Backlog`, `To Do`, `WIP`, `Done`, `Done Done`) and one starter card in `To Do`, so you never land on a blank panel.
 
 ### 🎯 Core Functionality
 

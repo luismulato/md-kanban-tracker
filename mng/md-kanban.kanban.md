@@ -17,23 +17,57 @@
 
     ```md
     Referencia visual: ![ref](assets/ref-columna-borde-boton-plus.png)
-
+    
     Dos cambios sobre las columnas del board, inspirados en la imagen:
-
+    
     - Botón "+" junto al título de la columna (o al pie, tipo
-      "+ New page" de Notion) para agregar una tarjeta a esa columna
-      sin editar el markdown a mano.
+    "+ New page" de Notion) para agregar una tarjeta a esa columna
+    sin editar el markdown a mano.
     - Borde sutil alrededor de la columna para destacarla —
-      redondeado, de bajo contraste, como el de la referencia.
+    redondeado, de bajo contraste, como el de la referencia.
     ```
 
 ### Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)
 
+
+### Links html/file en la descripción de una tarjeta deben abrirse con Cmd+Click
+
+- tags: [story]
+    ```md
+    Al desplegar una historia, si su descripción tiene links `http(s)://`
+    o `file://` (o rutas relativas navegables), deben renderizarse como
+    enlaces y abrirse con Cmd+Click (macOS) / Ctrl+Click, igual que en
+    un archivo Markdown de VSCode. Hoy salen como texto plano.
+    ```
+
 ## To Do
+
+### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
+
+    ```md
+    Si es un bug, registralo aquí, y realiza el ciclo tdd, atdd, y deja lista la versión para desplegar.
+    ```
 
 ## WIP
 
 ## Done
+
+### Cuando se llama por primera vez al plugin y el archivo está vacío debe crear un esqueleto vacío y una tarjeta por defecto
+
+    ```md
+    Al abrir un `.kanban.md` vacío (o con solo espacios/saltos), la
+    extensión ahora escribe el esqueleto estándar — las cinco columnas
+    Backlog / To Do / WIP / Done / Done Done más una tarjeta inicial en
+    To Do — y guarda el archivo antes de parsear. Un board recién creado
+    abre en algo usable en vez de un panel vacío; los archivos que ya
+    tienen contenido no se tocan.
+
+    Esqueleto y predicado de "vacío" en un módulo puro
+    (src/templates/emptyBoardSkeleton.ts) con tests unitarios; el
+    guardado va en kanbanWebviewPanel.loadMarkdownFile, marcando
+    isSavingFromWebview para que el listener de cambios no lo tome como
+    edición externa.
+    ```
 
 ### Propiedad `origin` en las tarjetas (marca de procedencia)
 
@@ -43,7 +77,7 @@
     de dónde se promovió una card, para boards agregadores (un
     planificador semanal que junta cards de varios backlogs en un solo
     board). En el board propio de un proyecto se deja sin setear.
-
+    
     Solo markdown por ahora (sin UI), igual que `owner`. Parseada,
     serializada primera entre las propiedades, round-trip limpio.
     De paso se documentaron en el README las propiedades `type` y
@@ -69,17 +103,16 @@
     mientras está en WIP, se detiene apenas sale). Pausa/reanudar y
     reset a nivel de tarjeta; la columna WIP tiene "Pause all"/"Resume
     all" para todas a la vez.
-
+    
     "Single WIP" ahora es por owner (- owner: <nombre> en el markdown,
     sin owner = Luis por default), no por columna: Luis y uno o más
     agentes de IA pueden tener cada uno su propia tarjeta en WIP al
     mismo tiempo; una segunda tarjeta del mismo owner sigue empujando
     la anterior de ese owner a To Do.
-
+    
     No se agregó UI para asignar el owner de una tarjeta (se setea a
     mano en el markdown) — quedó fuera de alcance de esta historia.
     ```
-
 
 ### Multi-select cards with Cmd+Click and delete them via right-click
 

@@ -6,6 +6,7 @@ import { currentWipTitles } from './automation/boardRules';
 import { ensureCompanionFolder } from './automation/companionFiles';
 import { applyBoardAutomation, ApplyBoardAutomationResult } from './automation/boardAutomation';
 import { startTimer, stopTimer } from './automation/timelog';
+import { EMPTY_BOARD_SKELETON, isBlankBoardContent } from './templates/emptyBoardSkeleton';
 
 /**
  * Creates a fingerprint of the board structure for content comparison.
@@ -247,8 +248,15 @@ export class KanbanWebviewPanel {
         });
     }
 
-    public loadMarkdownFile(document: vscode.TextDocument) {
+    public async loadMarkdownFile(document: vscode.TextDocument) {
         this._document = document;
+
+        // first open of a blank .kanban.md: seed the standard skeleton so the
+        // user lands on a real board instead of an empty panel.
+        if (document.uri.fsPath.endsWith('.kanban.md') && isBlankBoardContent(document.getText())) {
+            await this._seedBlankBoard(document);
+        }
+
         try {
             this._board = MarkdownKanbanParser.parseMarkdown(document.getText());
         } catch (error) {
@@ -271,6 +279,29 @@ export class KanbanWebviewPanel {
         }
 
         this._update();
+    }
+
+    /**
+     * Writes the starter skeleton into a blank .kanban.md and saves it, so the
+     * board that gets parsed right after is a real one. Guards against the
+     * document-change listener treating this as an external hand-edit.
+     */
+    private async _seedBlankBoard(document: vscode.TextDocument) {
+        this._isSavingFromWebview = true;
+        try {
+            const edit = new vscode.WorkspaceEdit();
+            edit.replace(
+                document.uri,
+                new vscode.Range(0, 0, document.lineCount, 0),
+                EMPTY_BOARD_SKELETON
+            );
+            await vscode.workspace.applyEdit(edit);
+            await document.save();
+        } finally {
+            setTimeout(() => {
+                this._isSavingFromWebview = false;
+            }, 100);
+        }
     }
 
     /**
