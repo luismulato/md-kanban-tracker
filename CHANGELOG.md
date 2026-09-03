@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-03
+
 ### Features
 
 - **`bug` task type**: a fifth task type, `bug`, joins `epic`, `story`, `task` and `spike`. Set it in markdown with `- type: bug`, or reach it by clicking a card's type badge — the click-to-cycle order is now `epic -> story -> task -> spike -> bug -> (unset)` on both the card and the task modal. Bug cards show a red "Bug" badge. Parsed, serialized and round-tripped like the other types.
