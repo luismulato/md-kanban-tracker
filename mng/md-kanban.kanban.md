@@ -27,9 +27,6 @@
     redondeado, de bajo contraste, como el de la referencia.
     ```
 
-### Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)
-
-
 ### Links html/file en la descripción de una tarjeta deben abrirse con Cmd+Click
 
 - tags: [story]
@@ -48,9 +45,32 @@
     Si es un bug, registralo aquí, y realiza el ciclo tdd, atdd, y deja lista la versión para desplegar.
     ```
 
+### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"
+
+    ```md
+    El click derecho no hace nada.
+    ```
+
 ## WIP
 
 ## Done
+
+### Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)
+
+    ```md
+    El contador de tarjetas junto al título de columna ya existía; el
+    botón "+ Add card" también, pero estaba siempre visible (sutil) al
+    pie. Ahora es estilo Notion: aparece solo mientras el puntero está
+    sobre la columna. El área vacía de la columna sigue abriendo el
+    mismo editor, así que el botón no es la única vía.
+
+    Cambio en Column.tsx (render condicional por isHovered) + testids
+    column-<id> y column-count-<id>. Ciclo ATDD+TDD:
+    docs/features/hover-add-card-button.feature +
+    src/webview/__tests__/Column.test.tsx (4 casos nuevos).
+    ```
+
+## Done Done
 
 ### Cuando se llama por primera vez al plugin y el archivo está vacío debe crear un esqueleto vacío y una tarjeta por defecto
 
@@ -61,7 +81,7 @@
     To Do — y guarda el archivo antes de parsear. Un board recién creado
     abre en algo usable en vez de un panel vacío; los archivos que ya
     tienen contenido no se tocan.
-
+    
     Esqueleto y predicado de "vacío" en un módulo puro
     (src/templates/emptyBoardSkeleton.ts) con tests unitarios; el
     guardado va en kanbanWebviewPanel.loadMarkdownFile, marcando
@@ -148,6 +168,4 @@
 ### En una tarjeta, al hacer click derecho, Agregar opción "move on top" (nombrala mejor con algun estandar) para que una card quede de primera en su columna.
 
 - tags: [story]
-
-## Done Done
 

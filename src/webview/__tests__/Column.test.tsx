@@ -75,6 +75,8 @@ describe('Quick add a note by clicking an empty column area', () => {
     setupStore();
     render(<KanbanBoard />);
 
+    // the button only shows while its column is hovered
+    fireEvent.mouseEnter(screen.getByTestId('column-column-1'));
     const addButtons = screen.getAllByRole('button', { name: /add card/i });
     fireEvent.click(addButtons[0]); // Column 1's button
 
@@ -128,6 +130,69 @@ describe('Quick add a note by clicking an empty column area', () => {
     const state = useKanbanStore.getState();
     expect(state.newTaskColumnId).toBeNull();
     expect(state.board!.columns.find(c => c.id === 'column-1')!.tasks.length).toBe(before);
+  });
+});
+
+/**
+ * Scenarios from docs/features/hover-add-card-button.feature:
+ * each column's "+ Add card" button stays hidden until the pointer is
+ * over that column (Notion-style), while the task counter next to the
+ * title is always visible.
+ */
+describe('Hover-only "+ Add card" button', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useKanbanStore.setState({
+      board: null,
+      isLoading: true,
+      isDragging: false,
+      dragPreview: null,
+      openTaskId: null,
+      newTaskColumnId: null,
+      selectedTaskIds: new Set(),
+      taskTimers: {},
+      _fingerprint: '',
+    });
+  });
+
+  const setup = () => {
+    useKanbanStore.getState().setBoard(createMockBoard());
+    render(<KanbanBoard />);
+  };
+
+  it('hides the Add card button until its column is hovered', () => {
+    setup();
+    expect(screen.queryByRole('button', { name: /add card/i })).not.toBeInTheDocument();
+
+    fireEvent.mouseEnter(screen.getByTestId('column-column-1'));
+    expect(screen.getByRole('button', { name: /add card/i })).toBeInTheDocument();
+
+    fireEvent.mouseLeave(screen.getByTestId('column-column-1'));
+    expect(screen.queryByRole('button', { name: /add card/i })).not.toBeInTheDocument();
+  });
+
+  it('reveals the button only for the hovered column', () => {
+    setup();
+    fireEvent.mouseEnter(screen.getByTestId('column-column-2'));
+
+    expect(screen.getAllByRole('button', { name: /add card/i })).toHaveLength(1);
+  });
+
+  it('keeps the task counter visible whether or not the column is hovered', () => {
+    setup();
+    expect(screen.getByTestId('column-count-column-1')).toHaveTextContent('3');
+
+    fireEvent.mouseEnter(screen.getByTestId('column-column-1'));
+    expect(screen.getByTestId('column-count-column-1')).toHaveTextContent('3');
+  });
+
+  it('the revealed button still opens the New note editor', () => {
+    setup();
+    fireEvent.mouseEnter(screen.getByTestId('column-column-1'));
+    fireEvent.click(screen.getByRole('button', { name: /add card/i }));
+
+    expect(useKanbanStore.getState().newTaskColumnId).toBe('column-1');
+    expect(screen.getByDisplayValue('New note')).toBeInTheDocument();
   });
 });
 

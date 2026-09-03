@@ -45,6 +45,7 @@ function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
   return (
     <div
       ref={setNodeRef}
+      data-testid={`column-${column.id}`}
       className={`flex-shrink-0 w-80 rounded-lg p-4 transition-colors duration-150 flex flex-col ${
         isOver
           ? 'bg-vscode-list-hoverBg ring-2 ring-vscode-focusBorder'
@@ -79,7 +80,10 @@ function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
               </button>
             </div>
           )}
-          <span className="text-sm text-vscode-foreground opacity-60">
+          <span
+            data-testid={`column-count-${column.id}`}
+            className="text-sm text-vscode-foreground opacity-60"
+          >
             {column.tasks.length}
           </span>
         </div>
@@ -102,18 +106,16 @@ function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
         </div>
       </SortableContext>
 
-      {/* Add task button - always visible at bottom, more prominent on hover */}
-      <button
-        onClick={handleAddClick}
-        className={`mt-3 w-full py-2 px-3 rounded text-sm flex items-center justify-center gap-2 transition-all duration-150 ${
-          isHovered
-            ? 'bg-vscode-button-bg text-vscode-button-fg hover:bg-vscode-button-hoverBg'
-            : 'text-vscode-foreground opacity-50 hover:opacity-100 hover:bg-vscode-list-hoverBg'
-        }`}
-      >
-        <span className="text-lg leading-none">+</span>
-        <span>Add card</span>
-      </button>
+      {/* add task button - Notion-style, only shown while the column is hovered */}
+      {isHovered && (
+        <button
+          onClick={handleAddClick}
+          className="mt-3 w-full py-2 px-3 rounded text-sm flex items-center justify-center gap-2 transition-all duration-150 bg-vscode-button-bg text-vscode-button-fg hover:bg-vscode-button-hoverBg"
+        >
+          <span className="text-lg leading-none">+</span>
+          <span>Add card</span>
+        </button>
+      )}
     </div>
   );
 }

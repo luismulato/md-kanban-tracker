@@ -10,8 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-03
+
 ### Features
 
+- **Hover-only "+ Add card" button**: each column's "+ Add card" button is now hidden until the pointer is over that column (Notion-style), instead of always sitting at the footer in a dim state. The task counter next to the column title is unchanged — always visible. Clicking the column's empty area still opens the same new-note editor, so the button isn't the only way in.
 - **Skeleton board on first open**: opening an empty (or whitespace-only) `.kanban.md` now seeds it with the five standard columns (`Backlog`, `To Do`, `WIP`, `Done`, `Done Done`) and a single starter card in `To Do`, then saves the file — so a freshly created board opens onto something usable instead of an empty panel. Files that already have content are left untouched.
 - **Task origin marker**: cards can now carry an `- origin: <domain>/<project>` markdown property. It records where a card was promoted from, for aggregator boards such as a weekly planner that pulls cards out of several project backlogs into one board. On a project's own board you leave it unset — the origin is implicitly that project. Markdown-only for now (no UI to set it), same as `owner`. Parsed, serialized first among the task properties, and round-trips cleanly. Also documents the previously-undocumented `type` and `owner` properties in the README attribute table.
 

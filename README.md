@@ -75,6 +75,7 @@ Built with modern technologies (React 19, TypeScript 5.9, Vite 7) and designed t
 
 - **Archive Support**: Move completed columns to archive state
 - **Column Management**: Hide/show, reorder columns via drag & drop
+- **Per-column quick add**: each column shows its task count next to the title (Notion-style) and reveals a "+ Add card" button on hover — clicking it (or the column's empty area) opens the new-note editor
 - **Tag Filtering**: Filter tasks by one or multiple tags (comma-separated)
 - **Multiple Sort Options**: Sort by name, due date, priority, workload
 - **File Switcher**: Toggle automatic file switching behavior
