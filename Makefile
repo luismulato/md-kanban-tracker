@@ -7,7 +7,7 @@ ifneq (,$(wildcard .env))
     export
 endif
 
-.PHONY: build check clean install dev-install publish publish-patch publish-minor publish-major tag
+.PHONY: build check clean install dev-install package publish publish-patch publish-minor publish-major tag
 
 dev-install:
 	@./scripts/dev-install.sh
@@ -16,6 +16,13 @@ build:
 	@echo "Building extension and webview..."
 	npm run build
 	@echo "Build complete. Press F5 in VSCode to debug."
+
+package:
+	@echo "Packaging vsix into releases/ ..."
+	npm run package
+	mkdir -p releases
+	npx --yes @vscode/vsce package --out releases/
+	@echo "Done. Install from releases/ via: Extensions -> Install from VSIX..."
 
 check:
 	@echo "Running checks..."
@@ -28,6 +35,7 @@ clean:
 	rm -rf dist/
 	rm -rf out/
 	rm -f *.vsix
+	rm -rf releases/
 	@echo "Clean complete."
 
 install:
