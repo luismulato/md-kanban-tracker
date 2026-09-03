@@ -7,7 +7,10 @@ ifneq (,$(wildcard .env))
     export
 endif
 
-.PHONY: build check clean install publish publish-patch publish-minor publish-major tag
+.PHONY: build check clean install dev-install publish publish-patch publish-minor publish-major tag
+
+dev-install:
+	@./scripts/dev-install.sh
 
 build:
 	@echo "Building extension and webview..."
