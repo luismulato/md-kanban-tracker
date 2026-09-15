@@ -1,10 +1,10 @@
-import { memo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { KanbanTask } from '../../types/kanban';
 import { TaskCard } from './TaskCard';
 import { TaskContextMenu } from './TaskContextMenu';
-import { useKanbanStore, useIsTaskSelected, useSelectedTaskCount } from '../../stores/kanbanStore';
+import { useKanbanStore, useIsTaskSelected, useIsFirstTaskInColumn, useSelectedTaskCount } from '../../stores/kanbanStore';
 
 interface SortableTaskProps {
   task: KanbanTask;
@@ -15,10 +15,12 @@ interface SortableTaskProps {
 function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskProps) {
   const openModal = useKanbanStore((s) => s.openModal);
   const moveTaskToTop = useKanbanStore((s) => s.moveTaskToTop);
+  const moveTaskUp = useKanbanStore((s) => s.moveTaskUp);
   const deleteTask = useKanbanStore((s) => s.deleteTask);
   const deleteSelectedTasks = useKanbanStore((s) => s.deleteSelectedTasks);
   const toggleTaskSelection = useKanbanStore((s) => s.toggleTaskSelection);
   const isSelected = useIsTaskSelected(task.id);
+  const isFirstInColumn = useIsFirstTaskInColumn(columnId, task.id);
   const selectedCount = useSelectedTaskCount();
   const isMultiSelected = isSelected && selectedCount > 1;
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
@@ -55,6 +57,9 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
     openModal(task.id);
   };
 
+  const handleMoveUp = useCallback(() => moveTaskUp(columnId, task.id), [moveTaskUp, columnId, task.id]);
+  const handleMoveToTop = useCallback(() => moveTaskToTop(columnId, task.id), [moveTaskToTop, columnId, task.id]);
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     setContextMenuPos({ x: e.clientX, y: e.clientY });
@@ -87,7 +92,15 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
         onContextMenu={handleContextMenu}
         className="cursor-grab active:cursor-grabbing"
       >
-        <TaskCard task={task} isDragging={isDragging} isSelected={isSelected} onUpdateTask={onUpdateTask} />
+        <TaskCard
+          task={task}
+          isDragging={isDragging}
+          isSelected={isSelected}
+          isFirstInColumn={isFirstInColumn}
+          onUpdateTask={onUpdateTask}
+          onMoveUp={handleMoveUp}
+          onMoveToTop={handleMoveToTop}
+        />
       </div>
 
       {contextMenuPos && (

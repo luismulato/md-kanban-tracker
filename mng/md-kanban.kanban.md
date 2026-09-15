@@ -100,17 +100,20 @@
 ### Rotar tipos de tarjetas en kanban
 
     ```md
-    En la vista kanban, al dar click en type empieza a circular la lista de tipos, cuando llega al último y le doy click debería volver a salir el primero y seguir así.
+    En la vista kanban, al dar click en type empieza a circular la lista de tipos, cuando llega al último y le doy click debería volver a salir el primero y seguir así infinito. Hoy llega al último y para.
     ```
 
 ### Cambiar columna a la que pertenece una tarjeta dentro de la edición de la misma
 
+    ```md
+    Poder editar a que columna pertenece una nota dentro de la ventana de edición de nota (puede ser al lado de Type, Priority, Workload)
+    ```
 
 ### Dejar configurable el color de los tipos de tarjeta
 
     ```md
     crear una boton de tuerca (tipo config) que despliega menu de configuaracion.
-    Ahí despliega opción de personalizar colores de tipo de tarjeta:
+    Ahí despliega opción de personalizar colores de tipo de tarjeta (Epic,Story, Task, Spike, Bug:
     Agrega por defecto colores distintos para cada tipo.
     Ubica el botón donde sea más adecuado para este tipo de plugin.
     ```
@@ -131,7 +134,53 @@
     O al hacer rollover sobre la tarjeta activa boton X para eliminar
     ```
 
+### Agregar propiedad URL a las tarjetas y mostrar icono clickeable en la vista principal para abrirla
+
+
 ## WIP
+
+## Verify
+
+### Iconos de subir / subir al tope al hacer hover sobre una tarjeta
+
+- type: story
+    ```md
+    Como usuario del board, quiero mover una tarjeta hacia arriba dentro
+    de su columna directamente desde la tarjeta, para reordenar
+    prioridades sin abrir el menú contextual ni arrastrar.
+    
+    Al hacer rollover (hover) sobre una tarjeta aparecen dos iconos de
+    acción:
+    
+    - Flecha hacia arriba (↑): sube la tarjeta una posición en su
+    columna.
+    - Flecha hacia arriba con línea (⤒): manda la tarjeta al tope de su
+    columna (equivalente a "Move to top" del menú contextual).
+    
+    Criterios de aceptación:
+    
+    - Los iconos solo se ven en hover, alineados con los otros controles
+    de hover de la tarjeta (ej. la X de eliminar).
+    - Si la tarjeta ya es la primera de su columna, los iconos se
+    deshabilitan (o no se muestran).
+    - El click sobre un icono no abre la edición de la tarjeta.
+    - El orden queda persistido en el Markdown del board.
+    
+    Hecho: al hacer hover sobre una tarjeta aparecen dos iconos arriba a
+    la derecha, junto al timer — chevron-up (sube una posición) y
+    fold-up (manda al tope). Deshabilitados si la tarjeta ya es la
+    primera; el click no abre el modal ni arranca un drag, y el orden se
+    persiste vía el mismo mensaje moveTask que usa el drag & drop.
+    
+    Nueva acción moveTaskUp en kanbanStore + selector
+    useIsFirstTaskInColumn, componente CardMoveControls.tsx, hover state
+    en TaskCard. Ciclo ATDD+TDD:
+    docs/features/card-hover-move-controls.feature +
+    src/webview/__tests__/cardHoverMoveControls.test.tsx (8 casos).
+    
+    Fuera de alcance: no se agregaron iconos de bajar / mandar al fondo,
+    ni la X de eliminar en hover (borrar sigue en el menú contextual).
+    ```
 
 ## Done
 

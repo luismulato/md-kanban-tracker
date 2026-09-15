@@ -61,6 +61,7 @@ interface KanbanState {
   moveTask: (taskId: string, fromColumnId: string, toColumnId: string, newIndex: number) => void;
   reorderTask: (columnId: string, oldIndex: number, newIndex: number) => void;
   moveTaskToTop: (columnId: string, taskId: string) => void;
+  moveTaskUp: (columnId: string, taskId: string) => void;
   deleteTask: (columnId: string, taskId: string) => void;
   moveSelectedTasks: (taskIds: string[], toColumnId: string, atIndex: number) => void;
   deleteSelectedTasks: (taskIds: string[]) => void;
@@ -309,6 +310,19 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     if (oldIndex <= 0) return;
 
     get().reorderTask(columnId, oldIndex, 0);
+  },
+
+  moveTaskUp: (columnId, taskId) => {
+    const state = get();
+    if (!state.board) return;
+
+    const column = state.board.columns.find(c => c.id === columnId);
+    if (!column) return;
+
+    const oldIndex = column.tasks.findIndex(t => t.id === taskId);
+    if (oldIndex <= 0) return;
+
+    get().reorderTask(columnId, oldIndex, oldIndex - 1);
   },
 
   deleteTask: (columnId, taskId) => {
@@ -608,6 +622,12 @@ export const useModalTask = () =>
       if (task) return task;
     }
     return null;
+  });
+
+export const useIsFirstTaskInColumn = (columnId: string, taskId: string) =>
+  useKanbanStore((state) => {
+    const column = state.board?.columns.find(c => c.id === columnId);
+    return column ? column.tasks[0]?.id === taskId : true;
   });
 
 export const useIsTaskSelected = (taskId: string) =>

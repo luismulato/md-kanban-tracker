@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-09-15
+
+### Features
+
+- **Card hover reorder controls**: hovering a card now reveals two icons next to its timer — move up one position, and move to the top of the column (the same action the right-click menu offers). Reordering priorities no longer needs the context menu or a drag. The icons are disabled on the first card of a column, clicking them never opens the card, and the resulting order is persisted to the markdown board like any other move.
+
 ## [0.3.2] - 2026-09-03
 
 ### Tooling

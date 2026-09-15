@@ -1,15 +1,19 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import type { KanbanTask } from '../../types/kanban';
 import { Badge } from '../atoms/Badge';
 import { TASK_TYPE_LABELS, TASK_TYPE_BADGE_VARIANT, nextTaskType } from '../../utils/taskType';
 import { TaskTimer } from './TaskTimer';
+import { CardMoveControls } from './CardMoveControls';
 
 interface TaskCardProps {
   task: KanbanTask;
   isDragging?: boolean;
   isOverlay?: boolean;
   isSelected?: boolean;
+  isFirstInColumn?: boolean;
   onUpdateTask?: (taskId: string, updates: Partial<KanbanTask>) => void;
+  onMoveUp?: () => void;
+  onMoveToTop?: () => void;
 }
 
 function getPriorityBorderClass(priority: string) {
@@ -21,7 +25,17 @@ function getPriorityBorderClass(priority: string) {
   }
 }
 
-function TaskCardComponent({ task, isDragging = false, isOverlay = false, isSelected = false, onUpdateTask }: TaskCardProps) {
+function TaskCardComponent({
+  task,
+  isDragging = false,
+  isOverlay = false,
+  isSelected = false,
+  isFirstInColumn = false,
+  onUpdateTask,
+  onMoveUp,
+  onMoveToTop,
+}: TaskCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const baseClasses = 'bg-vscode-background p-3 rounded border';
 
   const priorityClasses = task.priority ? getPriorityBorderClass(task.priority) : '';
@@ -40,8 +54,16 @@ function TaskCardComponent({ task, isDragging = false, isOverlay = false, isSele
     onUpdateTask?.(task.id, { type: nextTaskType(task.type) });
   };
 
+  // reorder controls stay hidden until the card is hovered, like the column's "+ Add card"
+  const showMoveControls = !isOverlay && isHovered && !!onMoveUp && !!onMoveToTop;
+
   return (
-    <div className={`${baseClasses} ${stateClasses} ${priorityClasses} ${selectionClasses}`}>
+    <div
+      data-testid={`task-card-${task.id}`}
+      className={`${baseClasses} ${stateClasses} ${priorityClasses} ${selectionClasses}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {task.type && (
         <Badge
           variant={TASK_TYPE_BADGE_VARIANT[task.type]}
@@ -53,7 +75,16 @@ function TaskCardComponent({ task, isDragging = false, isOverlay = false, isSele
       )}
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-medium text-vscode-foreground">{task.title}</h3>
-        {!isOverlay && <TaskTimer taskId={task.id} title={task.title} />}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {showMoveControls && (
+            <CardMoveControls
+              onMoveUp={onMoveUp!}
+              onMoveToTop={onMoveToTop!}
+              disabled={isFirstInColumn}
+            />
+          )}
+          {!isOverlay && <TaskTimer taskId={task.id} title={task.title} />}
+        </div>
       </div>
 
       {task.tags && task.tags.length > 0 && (
@@ -90,6 +121,7 @@ export const TaskCard = memo(TaskCardComponent, (prevProps, nextProps) => {
     prevProps.isDragging === nextProps.isDragging &&
     prevProps.isOverlay === nextProps.isOverlay &&
     prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isFirstInColumn === nextProps.isFirstInColumn &&
     JSON.stringify(prevProps.task.tags) === JSON.stringify(nextProps.task.tags) &&
     JSON.stringify(prevProps.task.steps) === JSON.stringify(nextProps.task.steps)
   );
