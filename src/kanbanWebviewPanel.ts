@@ -7,6 +7,7 @@ import { ensureCompanionFolder } from './automation/companionFiles';
 import { applyBoardAutomation, ApplyBoardAutomationResult } from './automation/boardAutomation';
 import { startTimer, stopTimer } from './automation/timelog';
 import { EMPTY_BOARD_SKELETON, isBlankBoardContent } from './templates/emptyBoardSkeleton';
+import { buildWebviewHtml } from './webviewHtml';
 
 /**
  * Creates a fingerprint of the board structure for content comparison.
@@ -648,27 +649,17 @@ export class KanbanWebviewPanel {
 
     private _getHtmlForWebview() {
         const htmlPath = vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'index.html');
-        let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
+        const html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 
         const webviewUri = this._panel.webview.asWebviewUri(
             vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview')
         );
 
-        const cspSource = this._panel.webview.cspSource;
-        const nonce = this._getNonce();
-
-        // Replace placeholders
-        html = html.replace(/{{cspSource}}/g, cspSource);
-        html = html.replace(/{{nonce}}/g, nonce);
-
-        // Fix asset paths - convert /assets/ to proper webview URIs
-        html = html.replace(/src="\/assets\//g, `src="${webviewUri.toString()}/assets/`);
-        html = html.replace(/href="\/assets\//g, `href="${webviewUri.toString()}/assets/`);
-
-        // Add nonce to inline scripts
-        html = html.replace(/<script/g, `<script nonce="${nonce}"`);
-
-        return html;
+        return buildWebviewHtml(html, {
+            webviewUri: webviewUri.toString(),
+            cspSource: this._panel.webview.cspSource,
+            nonce: this._getNonce(),
+        });
     }
 
     private _getNonce() {

@@ -43,6 +43,14 @@
 
 ## To Do
 
+### Agrega versión en la UI
+
+- type: story
+- priority: high
+    ```md
+    Quiero que la versión del plugin salga visible en la UI en la esquina superior derecha con una fuente chica, un color muy discreto.
+    ```
+
 ### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
 
 - type: story
@@ -79,6 +87,27 @@
     src/webview/__tests__/contextMenuPersistence.test.tsx (2 casos,
     rojos antes / verdes después) + bloque "Deterministic ids" en
     markdownParser.test.ts. 261 tests en verde.
+    ```
+
+### Icono "X" de eliminar en hover sobre la tarjeta
+
+- type: story
+    ```md
+    Al hacer hover sobre una tarjeta debe aparecer un icono "X" para
+    eliminarla, junto a los controles de mover (chevron-up / fold-up).
+    Hoy borrar está solo en el menú contextual (click derecho ->
+    "Delete card").
+    
+    Criterios de aceptación:
+    
+    - La X solo se ve en hover, alineada con los otros controles de
+    hover de la tarjeta.
+    - Pide confirmación antes de borrar, igual que la opción del menú
+    contextual.
+    - Con varias tarjetas seleccionadas (Cmd/Ctrl+click), respeta el
+    borrado múltiple como el menú contextual.
+    - El click sobre la X no abre la edición de la tarjeta ni arranca
+    un drag.
     ```
 
 ### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"

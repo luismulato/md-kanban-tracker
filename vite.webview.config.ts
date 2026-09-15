@@ -5,6 +5,9 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [react()],
   root: 'src/webview',
+  // relative base: urls inside the bundled css (the codicon font) must
+  // resolve next to the stylesheet, not at the webview origin root
+  base: './',
   build: {
     outDir: resolve(__dirname, 'dist/webview'),
     emptyOutDir: true,

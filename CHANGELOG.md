@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-09-15
+
+### Bug Fixes
+
+- **Codicon glyphs were never rendering in the webview**: the bundled stylesheet asked for the codicon font at `/assets/codicon.ttf`, a root-absolute url that resolves against the webview origin instead of the extension folder — so the font 404'd silently and every codicon button (the card hover controls, the WIP timer's pause/resume/reset) painted as a blank gap. The webview bundle is now built with a relative base, so urls inside the css resolve next to the stylesheet. The html rewriting moved to `src/webviewHtml.ts` (`buildWebviewHtml`), which handles relative and root-absolute asset references and is unit tested.
+
 ## [0.3.3] - 2026-09-15
 
 ### Features
