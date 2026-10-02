@@ -99,10 +99,18 @@ export function startTimer(companionDir: string, title: string, now: Date): void
 /**
  * Stops the timer running for `title` (if any) and appends a line to the
  * board's timelog file. Format matches mng/scripts/timelog.sh exactly:
- * `YYYY-MM-DD HH:MM–HH:MM (Nm) — "Tarea" (razon)` (en dash / em dash, not hyphens).
+ * `YYYY-MM-DD HH:MM–HH:MM (Nm) — "Tarea" (razon)` (en dash / em dash, not hyphens),
+ * plus a trailing ` @owner` when the caller knows whose time it was.
  * No-op if `title` has no running timer.
  */
-export function stopTimer(companionDir: string, boardBaseName: string, title: string, reason: string, now: Date): void {
+export function stopTimer(
+  companionDir: string,
+  boardBaseName: string,
+  title: string,
+  reason: string,
+  now: Date,
+  owner?: string,
+): void {
   const timers = readRunningTimers(companionDir);
   const index = timers.findIndex((t) => t.title === title);
   if (index === -1) {
@@ -117,7 +125,7 @@ export function stopTimer(companionDir: string, boardBaseName: string, title: st
   if (!fs.existsSync(logFile)) {
     fs.writeFileSync(logFile, `# ${boardBaseName} Timelog\n\n`, 'utf-8');
   }
-  const line = `${formatLocalDateTime(startDate)}–${formatLocalTime(now)} (${minutes}m) — "${title}" (${reason})\n`;
+  const line = `${formatLocalDateTime(startDate)}–${formatLocalTime(now)} (${minutes}m) — "${title}" (${reason})${owner ? ` @${owner}` : ''}\n`;
   fs.appendFileSync(logFile, line, 'utf-8');
   writeRunningTimers(companionDir, timers);
 }

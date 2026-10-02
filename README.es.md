@@ -277,7 +277,7 @@ Task description here
 | `owner` | string libre (por defecto `Luis`) | `owner: Claude` |
 | `origin` | string libre — marca de procedencia de una card promovida desde otro board | `origin: luis.jobs/anfora` |
 
-`owner` y `origin` son solo markdown (todavía sin UI para setearlos).
+`owner` se edita en el modal de la card (campo "Owner"), se muestra como chip `@owner` en la card y se agrega a cada línea del timelog. `origin` es solo markdown (todavía sin UI).
 `origin` es para boards agregadores como un planificador semanal: registra
 el `<dominio>/<proyecto>` del que se sacó la card. En el board propio de un
 proyecto se deja sin setear — la procedencia es ese proyecto.

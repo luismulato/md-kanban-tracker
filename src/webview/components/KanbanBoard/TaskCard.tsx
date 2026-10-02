@@ -87,6 +87,16 @@ function TaskCardComponent({
         </div>
       </div>
 
+      {task.owner && (
+        <span
+          data-testid={`task-owner-${task.id}`}
+          title="Owner"
+          className="inline-block mt-2 text-xs text-vscode-foreground opacity-70"
+        >
+          @{task.owner}
+        </span>
+      )}
+
       {task.tags && task.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">
           {task.tags.map((tag, idx) => (
@@ -118,6 +128,7 @@ export const TaskCard = memo(TaskCardComponent, (prevProps, nextProps) => {
     prevProps.task.type === nextProps.task.type &&
     prevProps.task.priority === nextProps.task.priority &&
     prevProps.task.workload === nextProps.task.workload &&
+    prevProps.task.owner === nextProps.task.owner &&
     prevProps.isDragging === nextProps.isDragging &&
     prevProps.isOverlay === nextProps.isOverlay &&
     prevProps.isSelected === nextProps.isSelected &&

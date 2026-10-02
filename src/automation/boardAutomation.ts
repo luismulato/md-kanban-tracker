@@ -1,5 +1,5 @@
 import type { KanbanBoard } from '../markdownParser';
-import { enforceSingleWip, archiveDoneColumn, currentWipTitles } from './boardRules';
+import { enforceSingleWip, archiveDoneColumn, currentWipTitles, ownerForTitle } from './boardRules';
 import { startTimer, stopTimer, readLastArchiveDate, writeLastArchiveDate, formatLocalDate } from './timelog';
 
 export interface ApplyBoardAutomationParams {
@@ -66,7 +66,7 @@ export function applyBoardAutomation(params: ApplyBoardAutomationParams): ApplyB
   }
 
   for (const title of left) {
-    stopTimer(companionDir, boardBaseName, title, 'auto, cambio de foco en WIP', now);
+    stopTimer(companionDir, boardBaseName, title, 'auto, cambio de foco en WIP', now, ownerForTitle(board, title));
   }
   for (const title of entered) {
     startTimer(companionDir, title, now);

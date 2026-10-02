@@ -216,3 +216,38 @@ describe('applyBoardAutomation', () => {
     expect(readRunningTimerTasks(tmpDir)).toEqual([]);
   });
 });
+
+describe('applyBoardAutomation timelog owner', () => {
+  function stopWithOwner(owner?: string): string {
+    const setup = makeBoard();
+    setup.columns.find((c) => c.title === 'To Do')!.tasks = [];
+    setup.columns.find((c) => c.title === 'WIP')!.tasks = [{ id: 't-a', title: 'Tarea A', owner }];
+    applyBoardAutomation({
+      board: setup,
+      companionDir: tmpDir,
+      boardBaseName: 'board',
+      previousWipTitles: [],
+      now: new Date(2026, 7, 22, 10, 0),
+    });
+    // the task leaves WIP (now in Done) and keeps its owner
+    const after = makeBoard();
+    after.columns.find((c) => c.title === 'To Do')!.tasks = [];
+    after.columns.find((c) => c.title === 'Done')!.tasks = [{ id: 't-a', title: 'Tarea A', owner }];
+    applyBoardAutomation({
+      board: after,
+      companionDir: tmpDir,
+      boardBaseName: 'board',
+      previousWipTitles: ['Tarea A'],
+      now: new Date(2026, 7, 22, 10, 30),
+    });
+    return fs.readFileSync(path.join(tmpDir, 'board.timelog.md'), 'utf-8');
+  }
+
+  it('logs the explicit owner of the task that left WIP', () => {
+    expect(stopWithOwner('Claude')).toContain('"Tarea A" (auto, cambio de foco en WIP) @Claude');
+  });
+
+  it('logs the default owner when the task has none', () => {
+    expect(stopWithOwner(undefined)).toContain('"Tarea A" (auto, cambio de foco en WIP) @Luis');
+  });
+});

@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-10-02
+
+### Features
+
+- **Card owner (author)**: the `- owner:` property now has a UI. Cards show it as an `@owner` chip, the edit/create modal has an "Owner" field (emptying it removes the property; the board still assumes `Luis`), and every new timelog line ends with `@<owner>` so the log says whose time it was. AI agents are expected to write their own name as owner when they create or run a card.
+
 ## [0.3.4] - 2026-09-15
 
 ### Bug Fixes

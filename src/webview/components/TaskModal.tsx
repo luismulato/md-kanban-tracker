@@ -20,6 +20,7 @@ const WORKLOAD_CYCLE: Workload[] = [undefined, 'Easy', 'Normal', 'Hard', 'Extrem
 export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateMode, onCreateTask }: TaskModalProps) {
   const [localSteps, setLocalSteps] = useState(task.steps || []);
   const [localDescription, setLocalDescription] = useState(task.description || '');
+  const [localOwner, setLocalOwner] = useState(task.owner || '');
   const [localTitle, setLocalTitle] = useState(task.title || '');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
@@ -126,6 +127,14 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
     const newSteps = [...(task.steps || [])];
     newSteps[index] = { ...newSteps[index], text: localSteps[index].text };
     onUpdateTask(task.id, { steps: newSteps });
+  };
+
+  const handleOwnerBlur = () => {
+    // an emptied field removes the owner (the board then assumes the default one)
+    const next = localOwner.trim();
+    if (next !== (task.owner || '')) {
+      onUpdateTask(task.id, { owner: next || undefined });
+    }
   };
 
   const handleDescriptionBlur = () => {
@@ -382,6 +391,23 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
                 className="w-full px-3 py-2 text-sm bg-vscode-input-bg text-vscode-foreground border border-vscode-input-border rounded focus:outline-none focus:border-vscode-primary cursor-pointer"
               />
             </div>
+          </div>
+
+          {/* Owner */}
+          <div>
+            <h3 className="text-sm font-semibold text-vscode-foreground mb-2">
+              Owner
+            </h3>
+            <input
+              type="text"
+              value={localOwner}
+              onChange={(e) => setLocalOwner(e.target.value)}
+              onBlur={handleOwnerBlur}
+              {...stopProp}
+              aria-label="Owner"
+              placeholder="Luis (default)"
+              className="w-full px-3 py-2 text-sm bg-vscode-input-bg text-vscode-foreground border border-vscode-input-border rounded focus:outline-none focus:border-vscode-primary"
+            />
           </div>
 
           {/* Description */}

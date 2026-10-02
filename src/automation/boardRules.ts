@@ -99,3 +99,12 @@ export function currentWipTitles(board: KanbanBoard): string[] {
   const wipColumn = findColumn(board, WIP_COLUMN);
   return wipColumn ? wipColumn.tasks.map((t) => t.title) : [];
 }
+
+/** Owner of the task with this title anywhere on the board, falling back to DEFAULT_OWNER. */
+export function ownerForTitle(board: KanbanBoard, title: string): string {
+  for (const column of board.columns) {
+    const task = column.tasks.find((t) => t.title === title);
+    if (task) return task.owner || DEFAULT_OWNER;
+  }
+  return DEFAULT_OWNER;
+}

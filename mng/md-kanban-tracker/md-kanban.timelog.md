@@ -7,3 +7,5 @@
 2026-09-03 07:00–07:07 (7m) — "Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)" (auto, cambio de foco en WIP)
 2026-09-03 07:22–07:40 (18m) — "no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug" (auto, cambio de foco en WIP)
 2026-09-03 07:54–07:57 (3m) — "Agregar tipo bug" (auto, cambio de foco en WIP)
+2026-10-02 15:58–15:58 (0m) — "Agregar autor o propietario a las tarjetas." (auto, cambio de foco en WIP)
+2026-10-02 16:00–16:04 (4m) — "Agregar autor o propietario a las tarjetas." (auto, cambio de foco en WIP)

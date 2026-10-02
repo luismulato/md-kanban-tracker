@@ -66,6 +66,7 @@ export function TaskModalContainer() {
       description: newTaskData.description,
       priority: newTaskData.priority,
       workload: newTaskData.workload,
+      owner: newTaskData.owner,
       dueDate: newTaskData.dueDate,
       tags: newTaskData.tags,
       steps: newTaskData.steps,

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { MarkdownKanbanParser, KanbanBoard, KanbanTask, KanbanColumn } from './markdownParser';
-import { currentWipTitles } from './automation/boardRules';
+import { currentWipTitles, ownerForTitle } from './automation/boardRules';
 import { ensureCompanionFolder } from './automation/companionFiles';
 import { applyBoardAutomation, ApplyBoardAutomationResult } from './automation/boardAutomation';
 import { startTimer, stopTimer } from './automation/timelog';
@@ -197,9 +197,13 @@ export class KanbanWebviewPanel {
      * the automatic start/stop tied to WIP membership itself still runs
      * through applyBoardAutomation() as usual.
      */
+    private _ownerOf(title: string): string | undefined {
+        return this._board ? ownerForTitle(this._board, title) : undefined;
+    }
+
     private _pauseTimer(title: string) {
         if (!this._companionDir || !this._boardBaseName) {return;}
-        stopTimer(this._companionDir, this._boardBaseName, title, 'manual pause', new Date());
+        stopTimer(this._companionDir, this._boardBaseName, title, 'manual pause', new Date(), this._ownerOf(title));
     }
 
     private _resumeTimer(title: string) {
@@ -210,7 +214,7 @@ export class KanbanWebviewPanel {
     private _resetTimer(title: string) {
         if (!this._companionDir || !this._boardBaseName) {return;}
         const now = new Date();
-        stopTimer(this._companionDir, this._boardBaseName, title, 'manual reset', now);
+        stopTimer(this._companionDir, this._boardBaseName, title, 'manual reset', now, this._ownerOf(title));
         startTimer(this._companionDir, title, now);
     }
 

@@ -135,3 +135,13 @@ describe('date formatting helpers', () => {
     expect(formatLocalDate(new Date(2026, 0, 5))).toBe('2026-01-05');
   });
 });
+
+describe('stopTimer owner suffix', () => {
+  it('ends the line with @owner when an owner is given', () => {
+    startTimer(tmpDir, 'Tarea A', new Date(2026, 7, 22, 14, 5, 0));
+    stopTimer(tmpDir, 'board', 'Tarea A', 'manual', new Date(2026, 7, 22, 14, 43, 0), 'Claude');
+
+    const log = fs.readFileSync(path.join(tmpDir, 'board.timelog.md'), 'utf-8');
+    expect(log).toContain('(38m) — "Tarea A" (manual) @Claude\n');
+  });
+});

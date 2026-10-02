@@ -211,39 +211,49 @@
     ni la X de eliminar en hover (borrar sigue en el menú contextual).
     ```
 
+### Agregar autor o propietario a las tarjetas.
+
+- type: story
+- priority: high
+- workload: Normal
+- owner: Claude
+    ```md
+    Como persona (o agente de IA) que trabaja el board, quiero ver y
+    editar quién es el autor/propietario de cada tarjeta, y que quede
+    registrado en el log de tiempo, para saber quién hizo qué.
+    
+    Contexto: `- owner:` ya existe en el markdown (default "Luis", agrupa
+    el WIP por dueño) pero no tiene UI ni aparece en el timelog.
+    
+    Criterios de aceptación:
+    
+    - La tarjeta muestra el owner como chip cuando está definido; sin
+    owner no se muestra nada (se asume "Luis").
+    - El modal de edición/creación tiene un campo "Owner"; vaciarlo
+    quita la propiedad del markdown.
+    - Cada línea nueva del timelog termina con `@<owner>` (owner
+    explícito o "Luis" por defecto).
+    - Si la tarjeta la crea o ejecuta una IA, la skill pone
+    `- owner: <nombre del agente>` (ej. Claude) como autora.
+    
+    Definition of Done:
+    
+    - [x] Feature Gherkin en docs/features/card-owner.feature.
+    - [x] Tests unitarios en verde (chip, modal, timelog, panel).
+    - [x] make check verde (tipos, lint, tests, build).
+    - [x] CHANGELOG y README actualizados (owner ya no es markdown-only).
+    - [x] Skill md-kanban-run setea owner de IA.
+    - [x] Versión nueva empaquetada en releases/ e instalada para probar.
+    - [x] Tarjeta en Verify (la aprueba Luis a mano).
+    
+    Hecho en 0.3.5 (instalada en VSCode; recargar ventana para probar):
+    chip @owner en la tarjeta, campo Owner en el modal, timelog con
+    @owner. Tests: cardOwner.test.tsx, timelog.test.ts,
+    boardAutomation.test.ts. Fuera de alcance: owner automático al crear
+    tarjetas desde la UI (queda vacío = Luis).
+    ```
+
 ## Done
-
-### Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)
-
-    ```md
-    El contador de tarjetas junto al título de columna ya existía; el
-    botón "+ Add card" también, pero estaba siempre visible (sutil) al
-    pie. Ahora es estilo Notion: aparece solo mientras el puntero está
-    sobre la columna. El área vacía de la columna sigue abriendo el
-    mismo editor, así que el botón no es la única vía.
-    
-    Cambio en Column.tsx (render condicional por isHovered) + testids
-    column-<id> y column-count-<id>. Ciclo ATDD+TDD:
-    docs/features/hover-add-card-button.feature +
-    src/webview/__tests__/Column.test.tsx (4 casos nuevos).
-    ```
-
-### Agregar tipo bug
-
-    ```md
-    En la vista del kanban que se pueda agregar un nuevo tipo: bug
-    
-    Se agregó `bug` como quinto tipo de tarjeta (epic/story/task/spike/bug).
-    Se setea con `- type: bug` en el markdown o clickeando el badge: el
-    ciclo ahora es epic -> story -> task -> spike -> bug -> (sin tipo),
-    en la tarjeta y en el modal. Badge rojo ("Bug").
-    
-    Ciclo ATDD+TDD: docs/features/bug-task-type.feature +
-    src/webview/__tests__/bugTaskType.test.tsx (5 casos). Implementación
-    en markdownParser.ts, webview/types/kanban.ts, webview/utils/taskType.ts
-    y TaskModal.tsx. Fuera de alcance: color de tipo configurable (tarjeta
-    aparte en To Do).
-    ```
 
 ## Done Done
 
@@ -343,4 +353,36 @@
 ### En una tarjeta, al hacer click derecho, Agregar opción "move on top" (nombrala mejor con algun estandar) para que una card quede de primera en su columna.
 
 - tags: [story]
+
+### Botón (+) "add new card" por columna al hacer hover + contador de tarjetas junto al nombre de la columna (estilo Notion)
+
+    ```md
+    El contador de tarjetas junto al título de columna ya existía; el
+    botón "+ Add card" también, pero estaba siempre visible (sutil) al
+    pie. Ahora es estilo Notion: aparece solo mientras el puntero está
+    sobre la columna. El área vacía de la columna sigue abriendo el
+    mismo editor, así que el botón no es la única vía.
+    
+    Cambio en Column.tsx (render condicional por isHovered) + testids
+    column-<id> y column-count-<id>. Ciclo ATDD+TDD:
+    docs/features/hover-add-card-button.feature +
+    src/webview/__tests__/Column.test.tsx (4 casos nuevos).
+    ```
+
+### Agregar tipo bug
+
+    ```md
+    En la vista del kanban que se pueda agregar un nuevo tipo: bug
+    
+    Se agregó `bug` como quinto tipo de tarjeta (epic/story/task/spike/bug).
+    Se setea con `- type: bug` en el markdown o clickeando el badge: el
+    ciclo ahora es epic -> story -> task -> spike -> bug -> (sin tipo),
+    en la tarjeta y en el modal. Badge rojo ("Bug").
+    
+    Ciclo ATDD+TDD: docs/features/bug-task-type.feature +
+    src/webview/__tests__/bugTaskType.test.tsx (5 casos). Implementación
+    en markdownParser.ts, webview/types/kanban.ts, webview/utils/taskType.ts
+    y TaskModal.tsx. Fuera de alcance: color de tipo configurable (tarjeta
+    aparte en To Do).
+    ```
 

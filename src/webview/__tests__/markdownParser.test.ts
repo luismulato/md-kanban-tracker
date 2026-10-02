@@ -677,3 +677,13 @@ describe('MarkdownKanbanParser', () => {
     });
   });
 });
+
+describe('owner round trip (card owner feature)', () => {
+  it('drops the owner line when the owner is removed', () => {
+    const md = '# B\n\n## To Do\n\n### T\n\n- owner: Claude\n';
+    const board = MarkdownKanbanParser.parseMarkdown(md);
+    expect(board.columns[0].tasks[0].owner).toBe('Claude');
+    board.columns[0].tasks[0].owner = undefined;
+    expect(MarkdownKanbanParser.generateMarkdown(board)).not.toContain('- owner:');
+  });
+});
