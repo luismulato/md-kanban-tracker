@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Features
+
+- **Delete from the card**: hovering a card now also shows an X ("Delete card") next to the move controls. It reuses the context-menu delete: confirms first and, with several cards selected, deletes all of them. Clicking it does not open the card.
+
 ## [0.3.5] - 2026-10-02
 
 ### Features

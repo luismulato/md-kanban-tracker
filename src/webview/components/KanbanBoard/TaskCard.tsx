@@ -14,6 +14,7 @@ interface TaskCardProps {
   onUpdateTask?: (taskId: string, updates: Partial<KanbanTask>) => void;
   onMoveUp?: () => void;
   onMoveToTop?: () => void;
+  onDelete?: () => void;
 }
 
 function getPriorityBorderClass(priority: string) {
@@ -34,6 +35,7 @@ function TaskCardComponent({
   onUpdateTask,
   onMoveUp,
   onMoveToTop,
+  onDelete,
 }: TaskCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const baseClasses = 'bg-vscode-background p-3 rounded border';
@@ -80,6 +82,7 @@ function TaskCardComponent({
             <CardMoveControls
               onMoveUp={onMoveUp!}
               onMoveToTop={onMoveToTop!}
+              onDelete={onDelete}
               disabled={isFirstInColumn}
             />
           )}

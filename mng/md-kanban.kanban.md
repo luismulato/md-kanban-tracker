@@ -166,13 +166,6 @@
 
 ## To Do
 
-### Borrar una tarjeta desde la pantalla principal
-
-    ```md
-    Explora que es más facil. menu con click derecho? botón X, otra.
-    Escoje la más rapida de implementar.
-    ```
-
 ## WIP
 
 ## Verify
@@ -287,6 +280,41 @@
     confirmó con boardRules.test.ts + boardAutomation.test.ts (23 en verde).
     Para verificar a mano: poné dos tarjetas de owners distintos en WIP
     (ej. Luis y Claude) y comprobá que ambas se quedan.
+    ```
+
+### Borrar una tarjeta desde la pantalla principal
+
+- type: story
+- owner: Claude
+    ```md
+    **Historia.** Como persona que usa el board, quiero borrar una tarjeta
+    directo desde la pantalla principal, para no tener que abrir el menú
+    contextual ni editar el markdown.
+
+    **Pedido original.** Explora que es más facil. menu con click derecho?
+    botón X, otra. Escoje la más rapida de implementar.
+
+    **Decisión.** El click derecho -> "Delete card" ya existe. La opción
+    más rápida y más visible es una X en hover junto a los controles de
+    mover, reusando el borrado existente (confirmación + selección
+    múltiple). Es la misma idea que la tarjeta de Backlog "Icono X de
+    eliminar en hover" (queda duplicada).
+
+    **Criterios de aceptación.**
+    - La X solo se ve con el puntero sobre la tarjeta.
+    - Al clickearla pide confirmación; si se cancela, no se borra nada.
+    - Si se confirma, la tarjeta desaparece del board.
+    - Con varias tarjetas seleccionadas, borra todas las seleccionadas.
+    - Clickear la X no abre el modal de edición de la tarjeta.
+
+    Hecho: X "Delete card" en hover, junto a los controles de mover
+    (CardMoveControls -> TaskCard -> SortableTask, reusa handleDelete).
+    Feature: docs/features/card-hover-delete.feature. Tests:
+    cardHoverDelete.test.tsx (6). 297 tests, tipos, lint y build en verde.
+    Fuera de alcance: probado solo en jsdom, no en la extensión instalada.
+    Para verificar a mano: pasá el mouse sobre una tarjeta, clic en la X,
+    cancelá y luego confirmá; probá también con varias seleccionadas.
+    Queda duplicada la tarjeta de Backlog "Icono X de eliminar en hover".
     ```
 
 ## Done

@@ -3,11 +3,12 @@ import { Icon } from '../atoms/Icon';
 interface CardMoveControlsProps {
   onMoveUp: () => void;
   onMoveToTop: () => void;
+  onDelete?: () => void;
   disabled?: boolean;
 }
 
-// hover-only reorder controls of a card: one step up, or straight to the top
-export function CardMoveControls({ onMoveUp, onMoveToTop, disabled = false }: CardMoveControlsProps) {
+// hover-only controls of a card: one step up, straight to the top, or delete
+export function CardMoveControls({ onMoveUp, onMoveToTop, onDelete, disabled = false }: CardMoveControlsProps) {
   // stop propagation so clicking a control doesn't start a drag or open the modal
   const stopProp = {
     onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
@@ -47,6 +48,20 @@ export function CardMoveControls({ onMoveUp, onMoveToTop, disabled = false }: Ca
       >
         <Icon name="fold-up" size="sm" />
       </button>
+      {onDelete && (
+        // delete is never disabled: it works on the first card too
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          aria-label="Delete card"
+          title="Delete card"
+          className="opacity-70 hover:opacity-100"
+        >
+          <Icon name="close" size="sm" />
+        </button>
+      )}
     </div>
   );
 }

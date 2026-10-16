@@ -100,6 +100,7 @@ function SortableTaskComponent({ task, columnId, onUpdateTask }: SortableTaskPro
           onUpdateTask={onUpdateTask}
           onMoveUp={handleMoveUp}
           onMoveToTop={handleMoveToTop}
+          onDelete={handleDelete}
         />
       </div>
 
