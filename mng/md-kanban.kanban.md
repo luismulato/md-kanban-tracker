@@ -2,47 +2,6 @@
 
 ## Backlog
 
-### Agregar drag handler en substasks al editar una tarjeta
-
-- type: story
-
-### Versión web del board (para verlo desde el celular sin VSCode)
-
-- tags: [epic]
-
-### Linkear el feature creado en bdd dentro de la doc de la tarjeta como un link navegable (relativo)
-
-    ```md
-    El link se debe poder ver dentro de las tarjetas.
-    Y dentro del as columnas.
-    ```
-
-### Botón "+" para agregar tarjeta en cada columna, y borde sutil de columna para destacarla
-
-    ```md
-    Referencia visual: ![ref](assets/ref-columna-borde-boton-plus.png)
-    
-    Dos cambios sobre las columnas del board, inspirados en la imagen:
-    
-    - Botón "+" junto al título de la columna (o al pie, tipo
-    "+ New page" de Notion) para agregar una tarjeta a esa columna
-    sin editar el markdown a mano.
-    - Borde sutil alrededor de la columna para destacarla —
-    redondeado, de bajo contraste, como el de la referencia.
-    ```
-
-### Links html/file en la descripción de una tarjeta deben abrirse con Cmd+Click
-
-- tags: [story]
-    ```md
-    Al desplegar una historia, si su descripción tiene links `http(s)://`
-    o `file://` (o rutas relativas navegables), deben renderizarse como
-    enlaces y abrirse con Cmd+Click (macOS) / Ctrl+Click, igual que en
-    un archivo Markdown de VSCode. Hoy salen como texto plano.
-    ```
-
-## To Do
-
 ### Agrega versión en la UI
 
 - type: story
@@ -166,6 +125,54 @@
 ### Agregar propiedad URL a las tarjetas y mostrar icono clickeable en la vista principal para abrirla
 
 
+### Agregar drag handler en substasks al editar una tarjeta
+
+- type: story
+
+### Versión web del board (para verlo desde el celular sin VSCode)
+
+- tags: [epic]
+
+### Linkear el feature creado en bdd dentro de la doc de la tarjeta como un link navegable (relativo)
+
+    ```md
+    El link se debe poder ver dentro de las tarjetas.
+    Y dentro del as columnas.
+    ```
+
+### Botón "+" para agregar tarjeta en cada columna, y borde sutil de columna para destacarla
+
+    ```md
+    Referencia visual: ![ref](assets/ref-columna-borde-boton-plus.png)
+    
+    Dos cambios sobre las columnas del board, inspirados en la imagen:
+    
+    - Botón "+" junto al título de la columna (o al pie, tipo
+    "+ New page" de Notion) para agregar una tarjeta a esa columna
+    sin editar el markdown a mano.
+    - Borde sutil alrededor de la columna para destacarla —
+    redondeado, de bajo contraste, como el de la referencia.
+    ```
+
+### Links html/file en la descripción de una tarjeta deben abrirse con Cmd+Click
+
+- tags: [story]
+    ```md
+    Al desplegar una historia, si su descripción tiene links `http(s)://`
+    o `file://` (o rutas relativas navegables), deben renderizarse como
+    enlaces y abrirse con Cmd+Click (macOS) / Ctrl+Click, igual que en
+    un archivo Markdown de VSCode. Hoy salen como texto plano.
+    ```
+
+## To Do
+
+### Borrar una tarjeta desde la pantalla principal
+
+    ```md
+    Explora que es más facil. menu con click derecho? botón X, otra.
+    Escoje la más rapida de implementar.
+    ```
+
 ## WIP
 
 ## Verify
@@ -214,9 +221,9 @@
 ### Agregar autor o propietario a las tarjetas.
 
 - type: story
+- owner: Claude
 - priority: high
 - workload: Normal
-- owner: Claude
     ```md
     Como persona (o agente de IA) que trabaja el board, quiero ver y
     editar quién es el autor/propietario de cada tarjeta, y que quede
@@ -251,6 +258,35 @@
     @owner. Tests: cardOwner.test.tsx, timelog.test.ts,
     boardAutomation.test.ts. Fuera de alcance: owner automático al crear
     tarjetas desde la UI (queda vacío = Luis).
+    ```
+
+### Permitir varias tarjetas en el WIP desde que sean de owners distintos.
+
+- type: story
+- owner: Claude
+    ```md
+    **Historia.** Como persona que trabaja el board junto con agentes de IA,
+    quiero que el WIP admita una tarjeta por owner, para que yo y uno o
+    más agentes trabajemos en paralelo sin que el board nos baje las
+    tarjetas a To Do.
+
+    **Pedido original.** Permitir varias tarjetas en el WIP desde que sean
+    de owners distintos.
+
+    **Criterios de aceptación.**
+    - Dado un WIP con una tarjeta de Luis, cuando entra una tarjeta de
+    Claude, entonces ambas quedan en WIP.
+    - Dado un owner con dos tarjetas en WIP, cuando se reconcilia el
+    board, entonces queda una sola (la recién movida) y la otra vuelve
+    arriba de To Do.
+    - Una tarjeta sin owner cuenta como "Luis".
+    - Cada owner con conflicto se resuelve por separado.
+
+    Ya estaba resuelta (commit 8f81740, enforceSingleWip por owner): no se
+    tocó código. Se documentó con docs/features/wip-per-owner.feature y se
+    confirmó con boardRules.test.ts + boardAutomation.test.ts (23 en verde).
+    Para verificar a mano: poné dos tarjetas de owners distintos en WIP
+    (ej. Luis y Claude) y comprobá que ambas se quedan.
     ```
 
 ## Done
