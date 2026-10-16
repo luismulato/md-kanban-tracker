@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-10-16
+
 ### Features
 
 - **Version in the UI**: the plugin version (from `package.json`, injected at build time) is shown as a small, muted `vX.Y.Z` in the top-right corner of the board. It doesn't capture clicks.
