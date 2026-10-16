@@ -2,14 +2,6 @@
 
 ## Backlog
 
-### Agrega versión en la UI
-
-- type: story
-- priority: high
-    ```md
-    Quiero que la versión del plugin salga visible en la UI en la esquina superior derecha con una fuente chica, un color muy discreto.
-    ```
-
 ### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
 
 - type: story
@@ -173,6 +165,7 @@
 ### Iconos de subir / subir al tope al hacer hover sobre una tarjeta
 
 - type: story
+- owner: Claude
     ```md
     Como usuario del board, quiero mover una tarjeta hacia arriba dentro
     de su columna directamente desde la tarjeta, para reordenar
@@ -262,10 +255,10 @@
     quiero que el WIP admita una tarjeta por owner, para que yo y uno o
     más agentes trabajemos en paralelo sin que el board nos baje las
     tarjetas a To Do.
-
+    
     **Pedido original.** Permitir varias tarjetas en el WIP desde que sean
     de owners distintos.
-
+    
     **Criterios de aceptación.**
     - Dado un WIP con una tarjeta de Luis, cuando entra una tarjeta de
     Claude, entonces ambas quedan en WIP.
@@ -274,7 +267,7 @@
     arriba de To Do.
     - Una tarjeta sin owner cuenta como "Luis".
     - Cada owner con conflicto se resuelve por separado.
-
+    
     Ya estaba resuelta (commit 8f81740, enforceSingleWip por owner): no se
     tocó código. Se documentó con docs/features/wip-per-owner.feature y se
     confirmó con boardRules.test.ts + boardAutomation.test.ts (23 en verde).
@@ -290,23 +283,23 @@
     **Historia.** Como persona que usa el board, quiero borrar una tarjeta
     directo desde la pantalla principal, para no tener que abrir el menú
     contextual ni editar el markdown.
-
+    
     **Pedido original.** Explora que es más facil. menu con click derecho?
     botón X, otra. Escoje la más rapida de implementar.
-
+    
     **Decisión.** El click derecho -> "Delete card" ya existe. La opción
     más rápida y más visible es una X en hover junto a los controles de
     mover, reusando el borrado existente (confirmación + selección
     múltiple). Es la misma idea que la tarjeta de Backlog "Icono X de
     eliminar en hover" (queda duplicada).
-
+    
     **Criterios de aceptación.**
     - La X solo se ve con el puntero sobre la tarjeta.
     - Al clickearla pide confirmación; si se cancela, no se borra nada.
     - Si se confirma, la tarjeta desaparece del board.
     - Con varias tarjetas seleccionadas, borra todas las seleccionadas.
     - Clickear la X no abre el modal de edición de la tarjeta.
-
+    
     Hecho: X "Delete card" en hover, junto a los controles de mover
     (CardMoveControls -> TaskCard -> SortableTask, reusa handleDelete).
     Feature: docs/features/card-hover-delete.feature. Tests:
@@ -315,6 +308,38 @@
     Para verificar a mano: pasá el mouse sobre una tarjeta, clic en la X,
     cancelá y luego confirmá; probá también con varias seleccionadas.
     Queda duplicada la tarjeta de Backlog "Icono X de eliminar en hover".
+    ```
+
+### Agrega versión en la UI
+
+- type: story
+- priority: high
+- owner: Claude
+    ```md
+    **Historia.** Como persona que usa el board, quiero ver la versión del
+    plugin en la esquina superior derecha, en letra chica y color discreto,
+    para saber qué versión tengo instalada sin abrir el panel de extensiones.
+
+    **Pedido original.** Quiero que la versión del plugin salga visible en
+    la UI en la esquina superior derecha con una fuente chica, un color muy
+    discreto.
+
+    **Criterios de aceptación.**
+    - Dado el board abierto, entonces se ve "v<versión>" en la esquina
+    superior derecha, con la versión de package.json.
+    - La etiqueta es de letra chica y color discreto (texto atenuado).
+    - La etiqueta no tapa ni desplaza el board ni sus controles, y no
+    captura clics.
+    - Al actualizar la versión del plugin, la etiqueta la refleja sin
+    tocar código.
+
+    Hecho: etiqueta "v<versión>" fija arriba a la derecha, letra chica,
+    opacidad baja, sin capturar clics. La versión sale de package.json vía
+    define de vite (build y vitest). Feature: docs/features/ui-version-label.feature.
+    Tests: versionLabel.test.tsx (4). 301 tests, tipos, lint y build en verde.
+    Fuera de alcance: no probado en la extensión instalada (solo jsdom).
+    Para verificar a mano: instalá la versión nueva y mirá la esquina
+    superior derecha del board.
     ```
 
 ## Done

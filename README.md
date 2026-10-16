@@ -76,6 +76,7 @@ Built with modern technologies (React 19, TypeScript 5.9, Vite 7) and designed t
 - **Archive Support**: Move completed columns to archive state
 - **Column Management**: Hide/show, reorder columns via drag & drop
 - **Per-column quick add**: each column shows its task count next to the title (Notion-style) and reveals a "+ Add card" button on hover — clicking it (or the column's empty area) opens the new-note editor
+- **Version label**: the installed plugin version shows discreetly in the board's top-right corner
 - **Card hover delete**: the same hover controls include an X ("Delete card") that asks for confirmation before deleting, and deletes every selected card when several are selected (Cmd/Ctrl+click)
 - **Card hover reorder controls**: hovering a card reveals two icons in its top-right corner — move the card up one position (chevron) or straight to the top of its column (fold-up). They are disabled on the first card of a column, and the new order is written back to the markdown file
 - **Tag Filtering**: Filter tasks by one or multiple tags (comma-separated)

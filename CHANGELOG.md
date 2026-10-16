@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 
+- **Version in the UI**: the plugin version (from `package.json`, injected at build time) is shown as a small, muted `vX.Y.Z` in the top-right corner of the board. It doesn't capture clicks.
 - **Delete from the card**: hovering a card now also shows an X ("Delete card") next to the move controls. It reuses the context-menu delete: confirms first and, with several cards selected, deletes all of them. Clicking it does not open the card.
 
 ## [0.3.5] - 2026-10-02

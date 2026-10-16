@@ -15,3 +15,5 @@ export type { BadgeProps, BadgeVariant } from './Badge';
 
 export { Icon } from './Icon';
 export type { IconProps } from './Icon';
+
+export { VersionLabel } from './VersionLabel';

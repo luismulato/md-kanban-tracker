@@ -18,6 +18,7 @@ import type { KanbanTask, KanbanColumn } from '../../types/kanban';
 import { Column } from './Column';
 import { TaskCard } from './TaskCard';
 import { TaskModalContainer } from '../TaskModalContainer';
+import { VersionLabel } from '../atoms/VersionLabel';
 import {
   useKanbanStore,
   useDisplayColumns,
@@ -258,6 +259,7 @@ export function KanbanBoard() {
       onDragCancel={handleDragCancel}
     >
       <div className="h-screen flex flex-col bg-vscode-background text-vscode-foreground">
+        <VersionLabel />
         <header className="p-4 border-b border-vscode-input-border flex items-center justify-between">
           <h1 className="text-2xl font-bold">{board.title || 'Kanban Board'}</h1>
           {selectedTaskCount > 0 && (
