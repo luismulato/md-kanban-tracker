@@ -6,6 +6,7 @@ import { currentWipTitles, ownerForTitle } from './automation/boardRules';
 import { ensureCompanionFolder } from './automation/companionFiles';
 import { applyBoardAutomation, ApplyBoardAutomationResult } from './automation/boardAutomation';
 import { startTimer, stopTimer } from './automation/timelog';
+import { decideExternalChange } from './automation/externalChange';
 import { EMPTY_BOARD_SKELETON, isBlankBoardContent } from './templates/emptyBoardSkeleton';
 import { buildWebviewHtml } from './webviewHtml';
 
@@ -50,6 +51,10 @@ export class KanbanWebviewPanel {
 
     // Track if modal is open - defer saves while modal is open
     private _isModalOpen = false;
+    /** Text last loaded from / written to the .kanban.md; lets us drop duplicate change events. */
+    private _lastKnownText?: string;
+    /** External change held back while a card modal was open. */
+    private _deferredDocument?: vscode.TextDocument;
 
     // Flag to track if there are pending changes to save when modal closes
     private _hasPendingChanges = false;
@@ -234,8 +239,20 @@ export class KanbanWebviewPanel {
         this._isModalOpen = isOpen;
 
         if (!isOpen && this._hasPendingChanges) {
-            // Modal closed and we have pending changes - save now
+            // Modal closed and we have pending changes - save now. The user's
+            // edit wins over any external change that arrived meanwhile.
+            if (this._deferredDocument) {
+                this._deferredDocument = undefined;
+                vscode.window.showWarningMessage(
+                    'The board file changed on disk while you were editing a card; your edit was saved over it. Check the file if an agent was editing too.'
+                );
+            }
             this._flushPendingSave();
+        } else if (!isOpen && this._deferredDocument) {
+            // Modal closed with nothing to save: apply the change that was held back
+            const deferred = this._deferredDocument;
+            this._deferredDocument = undefined;
+            void this.syncFromDisk(deferred);
         }
     }
 
@@ -261,8 +278,34 @@ export class KanbanWebviewPanel {
         });
     }
 
+    /** URI of the board file the panel is showing, if any. */
+    public get documentUri(): vscode.Uri | undefined {
+        return this._document?.uri;
+    }
+
+    /**
+     * Entry point for changes made to the .kanban.md from outside the panel
+     * (document-change listener and the on-disk file watcher). Reloads the
+     * board, ignores our own saves, and defers while a card modal is open.
+     */
+    public async syncFromDisk(document: vscode.TextDocument) {
+        const action = decideExternalChange({
+            isSaving: this._isSavingFromWebview,
+            isModalOpen: this._isModalOpen,
+            lastKnownText: this._lastKnownText,
+            diskText: document.getText(),
+        });
+        if (action === 'reload') {
+            this._deferredDocument = undefined;
+            await this.loadMarkdownFile(document);
+        } else if (action === 'defer') {
+            this._deferredDocument = document;
+        }
+    }
+
     public async loadMarkdownFile(document: vscode.TextDocument) {
         this._document = document;
+        this._lastKnownText = document.getText();
 
         // first open of a blank .kanban.md: seed the standard skeleton so the
         // user lands on a real board instead of an empty panel.
@@ -501,6 +544,7 @@ export class KanbanWebviewPanel {
         const taskHeaderFormat = config.get<'title' | 'list'>('taskHeader', 'title');
 
         const markdown = MarkdownKanbanParser.generateMarkdown(this._board, taskHeaderFormat);
+        this._lastKnownText = markdown;
         const edit = new vscode.WorkspaceEdit();
         edit.replace(
             this._document.uri,

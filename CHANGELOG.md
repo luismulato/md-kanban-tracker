@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.8]
+
+- **Board reloads when the file changes on disk, even if it is not open as text**: until now the panel only refreshed on VS Code's text-document change events, which never fire when the `.kanban.md` is closed as text and an agent, git or another editor rewrites it — the board kept showing stale content (and a later save could overwrite the external edit). A file watcher on `**/*.kanban.md` now reopens the file and reloads the board.
+- **No clobbering while a card modal is open**: an external change that arrives while a card is being edited is held back and applied when the modal closes; if the user's edit also needs saving, it wins and a warning explains that the file changed meanwhile.
+- Duplicate change events and the echo of the panel's own saves are dropped by comparing the content with what the panel last loaded or wrote (`src/automation/externalChange.ts`, unit tested).
+
 ## [0.3.7]
 
 - **WIP timer is now off by default**: new setting `md-kanban-tracker.timer.enabled` (default `false`). When off, moving a card into/out of WIP no longer starts/stops timers or writes the `.timelog.md`, the manual pause/resume/reset actions are ignored, and the webview hides the card timers and the "Pause all / Resume all" buttons. Done to avoid write conflicts when an agent and a human edit the board at the same time.

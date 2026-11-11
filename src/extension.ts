@@ -172,18 +172,35 @@ export function activate(context: vscode.ExtensionContext) {
 		if (event.document.fileName.endsWith('.kanban.md') && fileListenerEnabled) {
 			// Delay update to avoid frequent refreshes
 			setTimeout(() => {
-				// Update kanban in panel
-				if (KanbanWebviewPanel.currentPanel) {
-					// IMPORTANT: Skip reload if the change was initiated by the webview itself
-					// This prevents flickering when dragging tasks - the webview already has
-					// the updated state from optimistic updates
-					if (KanbanWebviewPanel.currentPanel.isSavingFromWebview()) {
-						return;
-					}
-					KanbanWebviewPanel.currentPanel.loadMarkdownFile(event.document);
+				// syncFromDisk skips our own saves (no flicker when dragging cards),
+				// duplicate events, and defers while a card modal is open.
+				const panel = KanbanWebviewPanel.currentPanel;
+				if (panel && panel.documentUri?.fsPath === event.document.uri.fsPath) {
+					void panel.syncFromDisk(event.document);
 				}
 			}, 500);
 		}
+	});
+
+	// Fallback for edits made on disk while the file is NOT open as text
+	// (an agent, git, another editor): onDidChangeTextDocument never fires
+	// then, so the board kept showing the old content. Watch the file itself
+	// and reopen it, which makes VS Code read the fresh version from disk.
+	const kanbanFileWatcher = vscode.workspace.createFileSystemWatcher('**/*.kanban.md');
+	let diskReloadTimer: NodeJS.Timeout | undefined;
+	kanbanFileWatcher.onDidChange((uri) => {
+		if (!fileListenerEnabled) {return;}
+		if (diskReloadTimer) {clearTimeout(diskReloadTimer);}
+		diskReloadTimer = setTimeout(async () => {
+			const panel = KanbanWebviewPanel.currentPanel;
+			if (!panel || panel.documentUri?.fsPath !== uri.fsPath) {return;}
+			try {
+				const document = await vscode.workspace.openTextDocument(uri);
+				await panel.syncFromDisk(document);
+			} catch (error) {
+				console.error('Error reloading kanban from disk:', error);
+			}
+		}, 300);
 	});
 
 	// Listen for active editor changes
@@ -201,6 +218,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Add to subscriptions list
 	context.subscriptions.push(
+		kanbanFileWatcher,
 		treeView,
 		openKanbanCommand,
 		disableFileListenerCommand,
