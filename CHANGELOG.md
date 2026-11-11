@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.7]
+
+- **WIP timer is now off by default**: new setting `md-kanban-tracker.timer.enabled` (default `false`). When off, moving a card into/out of WIP no longer starts/stops timers or writes the `.timelog.md`, the manual pause/resume/reset actions are ignored, and the webview hides the card timers and the "Pause all / Resume all" buttons. Done to avoid write conflicts when an agent and a human edit the board at the same time.
+
 ## [0.3.6] - 2026-10-16
 
 ### Features

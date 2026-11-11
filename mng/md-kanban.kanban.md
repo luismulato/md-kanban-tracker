@@ -2,9 +2,65 @@
 
 ## Backlog
 
+### Spike: tiempo efectivo por tarjeta cruzando el kanban con ActivityWatch y VSCode
+
+- type: story
+- owner: Luis
+- tags: [spike, timelog, activitywatch]
+- priority: high
+- workload: Normal
+- steps:
+  - [ ] S1 Línea base manual de 3 días (tarjeta propia, owner Luis)
+  - [x] S2 Extraer bloques activos de ActivityWatch (tarjeta propia, agente)
+  - [ ] S3 Cruzar los bloques con los intervalos de WIP de cada tarjeta
+  - [ ] S4 Comparar con la línea base
+  - [ ] S5 Decidir con datos si hace falta aw-watcher-vscode y aw-watcher-web
+  - [ ] S6 Generar el archivo de esfuerzo de un tablero real y revisarlo
+    ```md
+    **Historia.** Como Luis, quiero estimar el tiempo efectivo invertido en
+    cada tarjeta a partir de mi actividad real (ActivityWatch, VSCode y
+    otras fuentes), para no depender de que la tarjeta esté en WIP, que no
+    significa que esté trabajando en ella.
+
+    **Definition of Done (la historia se cierra solo si se cumple todo).**
+    - El total diario calculado queda a ±15 % de mi línea base manual en
+    3 días, y al menos 80 % de los bloques de prueba caen en la tarjeta
+    correcta (si no se logra, se documenta el abandono: el error no bajó
+    del 30 %).
+    - Hay una decisión escrita, con datos, sobre aw-watcher-vscode,
+    aw-watcher-web y los transcripts de Claude Code.
+    - La salida vive en un archivo hermano del tablero; el .kanban.md no
+    se escribe nunca.
+    - Existe un reporte de ejemplo de un tablero real, sin títulos de
+    ventana ni montos.
+
+    **Tareas.** Cada paso es una tarjeta propia cuando se toma; ninguna
+    queda suelta: todas llevan la etiqueta spike-tiempo-efectivo.
+
+    Runbook: [2026-10-30-spike-tiempo-efectivo-activitywatch-vscode.md](../runbooks/2026-10-30-spike-tiempo-efectivo-activitywatch-vscode.md)
+    ```
+
+### test
+
+
+### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"
+
+- type: spike
+- owner: Luis
+    ```md
+    El click derecho no hace nada.
+    
+    Mismo bug que "no encuentro la opción move on top" — el menú abría
+    pero se desmontaba al instante porque el parser regeneraba ids
+    random en cada parseo y la extensión reenvía el board seguido,
+    forzando un remount de todas las tarjetas. Arreglado con ids
+    deterministas en el parser (ver esa tarjeta para el detalle).
+    ```
+
 ### no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug
 
 - type: story
+- owner: Claude
     ```md
     Si es un bug, registralo aquí, y realiza el ciclo tdd, atdd, y deja lista la versión para desplegar.
     
@@ -38,40 +94,6 @@
     src/webview/__tests__/contextMenuPersistence.test.tsx (2 casos,
     rojos antes / verdes después) + bloque "Deterministic ids" en
     markdownParser.test.ts. 261 tests en verde.
-    ```
-
-### Icono "X" de eliminar en hover sobre la tarjeta
-
-- type: story
-    ```md
-    Al hacer hover sobre una tarjeta debe aparecer un icono "X" para
-    eliminarla, junto a los controles de mover (chevron-up / fold-up).
-    Hoy borrar está solo en el menú contextual (click derecho ->
-    "Delete card").
-    
-    Criterios de aceptación:
-    
-    - La X solo se ve en hover, alineada con los otros controles de
-    hover de la tarjeta.
-    - Pide confirmación antes de borrar, igual que la opción del menú
-    contextual.
-    - Con varias tarjetas seleccionadas (Cmd/Ctrl+click), respeta el
-    borrado múltiple como el menú contextual.
-    - El click sobre la X no abre la edición de la tarjeta ni arranca
-    un drag.
-    ```
-
-### No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"
-
-- type: spike
-    ```md
-    El click derecho no hace nada.
-    
-    Mismo bug que "no encuentro la opción move on top" — el menú abría
-    pero se desmontaba al instante porque el parser regeneraba ids
-    random en cada parseo y la extensión reenvía el board seguido,
-    forzando un remount de todas las tarjetas. Arreglado con ids
-    deterministas en el parser (ver esa tarjeta para el detalle).
     ```
 
 ### Al dar enter al agregar una suptask debe aceptarla y crear un nuevo subtask para estar listo para escribir.
@@ -158,9 +180,70 @@
 
 ## To Do
 
+### S1 · Línea base manual de 3 días: anotar bloques por tarjeta
+
+- type: task
+- owner: Luis
+- tags: [task, spike-tiempo-efectivo]
+- priority: high
+- workload: Normal
+- steps:
+  - [ ] Crear verdad-terreno.md junto al runbook del spike
+  - [ ] Anotar 3 días laborales: inicio, fin y tarjeta de cada bloque
+  - [ ] Marcar los bloques fuera del equipo (reuniones, papel)
+    ```md
+    Tarea de la historia «Spike: tiempo efectivo por tarjeta». Valida el
+    DoD «total diario a ±15 %»: sin una verdad de terreno no hay con qué
+    comparar. Solo la puede hacer Luis (15 min/día).
+    ```
+
+### Boton borrar abajo al editar una tarjeta
+
+
+### Icono "X" de eliminar en hover sobre la tarjeta (NO FUNCIONA)
+
+- type: story
+- owner: Claude
+    ```md
+    Al hacer hover sobre una tarjeta debe aparecer un icono "X" para
+    eliminarla, junto a los controles de mover (chevron-up / fold-up).
+    Hoy borrar está solo en el menú contextual (click derecho ->
+    "Delete card").
+    
+    Criterios de aceptación:
+    
+    - La X solo se ve en hover, alineada con los otros controles de
+    hover de la tarjeta.
+    - Pide confirmación antes de borrar, igual que la opción del menú
+    contextual.
+    - Con varias tarjetas seleccionadas (Cmd/Ctrl+click), respeta el
+    borrado múltiple como el menú contextual.
+    - El click sobre la X no abre la edición de la tarjeta ni arranca
+    un drag.
+    ```
+
 ## WIP
 
 ## Verify
+
+### Deshabilitar el timer de WIP por defecto (parametrizable)
+
+- type: task
+- owner: Claude
+- tags: [task, timelog, conflictos-escritura]
+- priority: high
+- workload: Normal
+- steps:
+  - [x] Setting md-kanban-tracker.timer.enabled, default false
+  - [x] Automatización no inicia/detiene timers ni escribe el timelog si está apagado
+  - [x] Webview oculta timers y botones Pause/Resume all si está apagado
+  - [x] Test nuevo para el default; suite completa en verde (302)
+    ```md
+    Motivo: escrituras simultáneas de agente y humano sobre el md/timelog
+    generaban conflictos. Falta que Luis lo pruebe en VS Code.
+
+    Runbook: [2026-10-31-timer-deshabilitado-por-defecto.md](../runbooks/2026-10-31-timer-deshabilitado-por-defecto.md)
+    ```
 
 ### Iconos de subir / subir al tope al hacer hover sobre una tarjeta
 
@@ -310,20 +393,55 @@
     Queda duplicada la tarjeta de Backlog "Icono X de eliminar en hover".
     ```
 
+## Done
+
+### S2 · Script que extrae de ActivityWatch los bloques activos de un día
+
+- type: task
+- owner: ia-pulpo-reloj
+- tags: [task, spike-tiempo-efectivo, agente]
+- priority: high
+- workload: Normal
+- steps:
+  - [x] Prueba que falla: bloques activos (not-afk ∩ ventana) con huecos puenteados
+  - [x] Implementar scripts/aw_effort/extract.py (solo lectura, solo stdlib)
+  - [x] Probar contra ActivityWatch real del 2026-10-30 y pegar el resultado
+    ```md
+    Tarea de la historia «Spike: tiempo efectivo por tarjeta» (paso S2 del
+    runbook). Aporta al DoD: sin bloques activos por proyecto no hay cruce
+    con WIP.
+
+    **Hecho cuando:**
+    - Las pruebas unitarias del puenteo de huecos y del título
+      «archivo — carpeta» están en verde.
+    - `python3 scripts/aw_effort/extract.py --date 2026-10-30` imprime
+      minutos activos por app y carpeta de trabajo, y no escribe nada.
+    - No importa nada fuera de la librería estándar.
+
+    **Resultado (2026-10-30).**
+    - 8 pruebas unitarias en verde (`cd scripts && python3 -m unittest aw_effort.test_extract`); estuvieron en rojo antes de implementar.
+    - Corrida real: 6 bloques, 17,3 min activos (Code/opi-openside 14,6; Chrome 2,5). Coincide con los 17,5 min que ActivityWatch tiene registrados.
+    - Hallazgo: ActivityWatch no tiene eventos antes de las 23:26 UTC aunque los buckets existen desde las 20:25 UTC. Hipótesis sin comprobar: los watchers no tenían el permiso de Accesibilidad de macOS hasta esa hora (aparece la app «universalAccessAuthWarn»). No hay histórico del día para S1/S4; la línea base de 3 días tiene que empezar desde mañana.
+    - Código: scripts/aw_effort/extract.py y test_extract.py. Solo lectura, solo librería estándar, Python 3.9.
+
+
+    Owner efímero: el agente ia-pulpo-reloj existe solo para esta tarea.
+    ```
+
 ### Agrega versión en la UI
 
 - type: story
-- priority: high
 - owner: Claude
+- priority: high
     ```md
     **Historia.** Como persona que usa el board, quiero ver la versión del
     plugin en la esquina superior derecha, en letra chica y color discreto,
     para saber qué versión tengo instalada sin abrir el panel de extensiones.
-
+    
     **Pedido original.** Quiero que la versión del plugin salga visible en
     la UI en la esquina superior derecha con una fuente chica, un color muy
     discreto.
-
+    
     **Criterios de aceptación.**
     - Dado el board abierto, entonces se ve "v<versión>" en la esquina
     superior derecha, con la versión de package.json.
@@ -332,7 +450,7 @@
     captura clics.
     - Al actualizar la versión del plugin, la etiqueta la refleja sin
     tocar código.
-
+    
     Hecho: etiqueta "v<versión>" fija arriba a la derecha, letra chica,
     opacidad baja, sin capturar clics. La versión sale de package.json vía
     define de vite (build y vitest). Feature: docs/features/ui-version-label.feature.
@@ -341,8 +459,6 @@
     Para verificar a mano: instalá la versión nueva y mirá la esquina
     superior derecha del board.
     ```
-
-## Done
 
 ## Done Done
 

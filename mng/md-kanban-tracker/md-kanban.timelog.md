@@ -9,3 +9,10 @@
 2026-09-03 07:54–07:57 (3m) — "Agregar tipo bug" (auto, cambio de foco en WIP)
 2026-10-02 15:58–15:58 (0m) — "Agregar autor o propietario a las tarjetas." (auto, cambio de foco en WIP)
 2026-10-02 16:00–16:04 (4m) — "Agregar autor o propietario a las tarjetas." (auto, cambio de foco en WIP)
+2026-10-16 11:53–11:53 (0m) — "Permitir varias tarjetas en el WIP desde que sean de owners distintos." (auto, cambio de foco en WIP) @Claude
+2026-10-16 11:53–11:55 (1m) — "Borrar una tarjeta desde la pantalla principal" (auto, cambio de foco en WIP) @Claude
+2026-10-16 11:59–12:01 (1m) — "Agrega versión en la UI" (auto, cambio de foco en WIP) @Claude
+2026-10-16 14:21–14:21 (1m) — "no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug" (auto, cambio de foco en WIP) @Luis
+2026-10-16 14:21–14:21 (0m) — "No funciona el click derecho sobre las tarjetas para ver las opciones "ejemplo: mover tarjeta arriba de todo"" (auto, cambio de foco en WIP) @Luis
+2026-10-16 14:21–14:22 (0m) — "Icono "X" de eliminar en hover sobre la tarjeta" (auto, cambio de foco en WIP) @Claude
+2026-10-16 14:21–14:23 (2m) — "no encuentro la opción "move on top"  o como la hallaz llamado, verifica que no sea un bug" (auto, cambio de foco en WIP) @Luis

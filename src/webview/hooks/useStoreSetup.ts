@@ -22,6 +22,9 @@ export function useStoreSetup() {
       const message = event.data;
       switch (message.type) {
         case 'updateBoard':
+          if (typeof message.timersEnabled === 'boolean') {
+            useKanbanStore.setState({ timersEnabled: message.timersEnabled });
+          }
           syncFromBackend(message.board);
           break;
       }

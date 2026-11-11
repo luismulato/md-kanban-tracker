@@ -201,17 +201,25 @@ export class KanbanWebviewPanel {
         return this._board ? ownerForTitle(this._board, title) : undefined;
     }
 
+    /** Timer feature flag (setting md-kanban-tracker.timer.enabled, off by default). */
+    private _timerEnabled(): boolean {
+        return vscode.workspace.getConfiguration('md-kanban-tracker').get<boolean>('timer.enabled', false);
+    }
+
     private _pauseTimer(title: string) {
+        if (!this._timerEnabled()) {return;}
         if (!this._companionDir || !this._boardBaseName) {return;}
         stopTimer(this._companionDir, this._boardBaseName, title, 'manual pause', new Date(), this._ownerOf(title));
     }
 
     private _resumeTimer(title: string) {
+        if (!this._timerEnabled()) {return;}
         if (!this._companionDir) {return;}
         startTimer(this._companionDir, title, new Date());
     }
 
     private _resetTimer(title: string) {
+        if (!this._timerEnabled()) {return;}
         if (!this._companionDir || !this._boardBaseName) {return;}
         const now = new Date();
         stopTimer(this._companionDir, this._boardBaseName, title, 'manual reset', now, this._ownerOf(title));
@@ -345,6 +353,7 @@ export class KanbanWebviewPanel {
             boardBaseName: this._boardBaseName,
             previousWipTitles: this._previousWipTitles,
             justMovedTitle,
+            timerEnabled: this._timerEnabled(),
         });
         this._previousWipTitles = result.newWipTitles;
         return result;
@@ -377,7 +386,7 @@ export class KanbanWebviewPanel {
      */
     private _sendBoardUpdate(force = false) {
         const board = this._board || { title: 'Please open a Markdown Kanban file', columns: [] };
-        const fingerprint = getBoardFingerprint(board);
+        const fingerprint = getBoardFingerprint(board) + (this._timerEnabled() ? '|t' : '');
 
         // Skip if content hasn't changed (unless forced)
         if (!force && fingerprint === this._lastSentFingerprint) {
@@ -387,7 +396,8 @@ export class KanbanWebviewPanel {
         this._lastSentFingerprint = fingerprint;
         this._panel.webview.postMessage({
             type: 'updateBoard',
-            board: board
+            board: board,
+            timersEnabled: this._timerEnabled()
         });
     }
 

@@ -38,6 +38,7 @@ describe('applyBoardAutomation', () => {
       board,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: [],
       justMovedTitle: 'Tarea A',
       now: new Date(2026, 7, 22, 10, 0),
@@ -59,6 +60,7 @@ describe('applyBoardAutomation', () => {
       board: setupBoard,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: [],
       justMovedTitle: 'Tarea A',
       now: new Date(2026, 7, 22, 9, 0),
@@ -69,6 +71,7 @@ describe('applyBoardAutomation', () => {
       board,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: ['Tarea A'],
       justMovedTitle: 'Tarea B',
       now: new Date(2026, 7, 22, 9, 30),
@@ -98,6 +101,7 @@ describe('applyBoardAutomation', () => {
       board,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: ['Tarea B'],
       justMovedTitle: null,
       now: new Date(2026, 7, 22, 11, 0),
@@ -117,6 +121,7 @@ describe('applyBoardAutomation', () => {
       board,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: ['Ya estaba'],
       justMovedTitle: 'Recien entra',
       now: new Date(2026, 7, 22, 12, 0),
@@ -140,6 +145,7 @@ describe('applyBoardAutomation', () => {
       board: setupBoard,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: [],
       justMovedTitle: 'Tarea del agente',
       now: new Date(2026, 7, 22, 11, 0),
@@ -155,6 +161,7 @@ describe('applyBoardAutomation', () => {
       board,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: ['Tarea del agente'],
       justMovedTitle: 'Tarea de Luis',
       now: new Date(2026, 7, 22, 12, 0),
@@ -174,6 +181,7 @@ describe('applyBoardAutomation', () => {
       board,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: [],
       justMovedTitle: 'Tarea A',
       now: new Date(2026, 7, 22, 8, 0),
@@ -190,6 +198,7 @@ describe('applyBoardAutomation', () => {
       board,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: ['Tarea A'],
       justMovedTitle: 'Tarea C',
       now: new Date(2026, 7, 22, 9, 0), // same day
@@ -207,6 +216,7 @@ describe('applyBoardAutomation', () => {
       board,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: ['Tarea A'],
       justMovedTitle: null,
       now: new Date(2026, 7, 22, 10, 0),
@@ -214,6 +224,16 @@ describe('applyBoardAutomation', () => {
 
     expect(result.boardChanged).toBe(false);
     expect(readRunningTimerTasks(tmpDir)).toEqual([]);
+  });
+});
+
+describe('applyBoardAutomation with the timer disabled (default)', () => {
+  it('does not start or log any timer when a task enters WIP', () => {
+    const board = makeBoard();
+    board.columns.find((c) => c.title === 'WIP')!.tasks = [{ id: 't-a', title: 'Tarea A' }];
+    applyBoardAutomation({ board, companionDir: tmpDir, boardBaseName: 'board', previousWipTitles: [] });
+    expect(readRunningTimerTasks(tmpDir)).toEqual([]);
+    expect(fs.existsSync(path.join(tmpDir, 'board.timelog.md'))).toBe(false);
   });
 });
 
@@ -226,6 +246,7 @@ describe('applyBoardAutomation timelog owner', () => {
       board: setup,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: [],
       now: new Date(2026, 7, 22, 10, 0),
     });
@@ -237,6 +258,7 @@ describe('applyBoardAutomation timelog owner', () => {
       board: after,
       companionDir: tmpDir,
       boardBaseName: 'board',
+      timerEnabled: true,
       previousWipTitles: ['Tarea A'],
       now: new Date(2026, 7, 22, 10, 30),
     });

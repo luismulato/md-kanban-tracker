@@ -47,6 +47,8 @@ interface KanbanState {
   newTaskColumnId: string | null;
   selectedTaskIds: Set<string>;
   taskTimers: Record<string, TaskTimerState>;
+  /** Mirrors the md-kanban-tracker.timer.enabled setting; the extension sends it with every board update. */
+  timersEnabled: boolean;
 
   // internal
   _fingerprint: string;
@@ -99,6 +101,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
   newTaskColumnId: null,
   selectedTaskIds: new Set(),
   taskTimers: {},
+  timersEnabled: true,
   _fingerprint: '',
 
   setBoard: (board) => {

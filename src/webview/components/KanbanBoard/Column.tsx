@@ -16,6 +16,7 @@ function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
   const openModalForNewTask = useKanbanStore((s) => s.openModalForNewTask);
   const pauseAllWipTimers = useKanbanStore((s) => s.pauseAllWipTimers);
   const resumeAllWipTimers = useKanbanStore((s) => s.resumeAllWipTimers);
+  const timersEnabled = useKanbanStore((s) => s.timersEnabled);
   const isWipColumn = column.title === WIP_COLUMN;
 
   const { setNodeRef, isOver } = useDroppable({
@@ -62,7 +63,7 @@ function ColumnComponent({ column, onUpdateTask }: ColumnProps) {
           )}
         </h2>
         <div className="flex items-center gap-2">
-          {isWipColumn && column.tasks.length > 0 && (
+          {timersEnabled && isWipColumn && column.tasks.length > 0 && (
             <div className="flex items-center gap-1">
               <button
                 onClick={pauseAllWipTimers}

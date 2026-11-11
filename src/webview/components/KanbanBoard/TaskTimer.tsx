@@ -30,7 +30,8 @@ export function TaskTimer({ taskId, title }: TaskTimerProps) {
     return () => clearInterval(interval);
   }, [timer]);
 
-  if (!timer) return null;
+  const timersEnabled = useKanbanStore((s) => s.timersEnabled);
+  if (!timersEnabled || !timer) return null;
 
   // stop propagation so clicking the controls doesn't also start a drag or open the modal
   const stopProp = {

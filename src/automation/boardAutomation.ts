@@ -17,6 +17,8 @@ export interface ApplyBoardAutomationParams {
    */
   justMovedTitle?: string | null;
   now?: Date;
+  /** When false, no timer is started/stopped and nothing is written to the timelog. Defaults to false. */
+  timerEnabled?: boolean;
 }
 
 export interface ApplyBoardAutomationResult {
@@ -65,10 +67,11 @@ export function applyBoardAutomation(params: ApplyBoardAutomationParams): ApplyB
     }
   }
 
-  for (const title of left) {
+  const timerEnabled = params.timerEnabled ?? false;
+  for (const title of timerEnabled ? left : []) {
     stopTimer(companionDir, boardBaseName, title, 'auto, cambio de foco en WIP', now, ownerForTitle(board, title));
   }
-  for (const title of entered) {
+  for (const title of timerEnabled ? entered : []) {
     startTimer(companionDir, title, now);
   }
 
