@@ -1,4 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { DndContext, PointerSensor, KeyboardSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { moveStep } from '../utils/steps';
 import type { KanbanTask } from '../types/kanban';
 import { TASK_TYPE_LABELS, nextTaskType } from '../utils/taskType';
 
@@ -16,6 +21,27 @@ type Workload = 'Easy' | 'Normal' | 'Hard' | 'Extreme' | undefined;
 
 const PRIORITY_CYCLE: Priority[] = [undefined, 'low', 'medium', 'high'];
 const WORKLOAD_CYCLE: Workload[] = [undefined, 'Easy', 'Normal', 'Hard', 'Extreme'];
+
+interface SortableStepRowProps {
+  id: string;
+  children: (handle: React.HTMLAttributes<HTMLElement>) => React.ReactNode;
+}
+
+// one step row; only the handle starts a drag, so the checkbox and text input keep working
+function SortableStepRow({ id, children }: SortableStepRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1 : 0,
+    opacity: isDragging ? 0.6 : 1,
+  };
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children({ ...attributes, ...listeners })}
+    </div>
+  );
+}
 
 export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateMode, onCreateTask }: TaskModalProps) {
   const [localSteps, setLocalSteps] = useState(task.steps || []);
@@ -127,6 +153,25 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
     const newSteps = [...(task.steps || [])];
     newSteps[index] = { ...newSteps[index], text: localSteps[index].text };
     onUpdateTask(task.id, { steps: newSteps });
+  };
+
+  // distance keeps a plain click on the handle from starting a drag
+  const stepSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+  const stepIds = localSteps.map((_, i) => `step-${i}`);
+
+  const handleStepDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!onUpdateTask || !over || active.id === over.id) return;
+    const from = stepIds.indexOf(String(active.id));
+    const to = stepIds.indexOf(String(over.id));
+    const current = task.steps || [];
+    const next = moveStep(current, from, to);
+    if (next === current) return;
+    setLocalSteps(next);
+    onUpdateTask(task.id, { steps: next });
   };
 
   const handleOwnerBlur = () => {
@@ -449,43 +494,61 @@ export function TaskModal({ task, onClose, onToggleStep, onUpdateTask, isCreateM
             )}
 
             {/* Steps List */}
-            <div className="space-y-2">
-              {localSteps.map((step, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 p-2 rounded hover:bg-vscode-list-hoverBg transition-colors group"
-                >
-                  <input
-                    type="checkbox"
-                    checked={step.completed}
-                    onChange={() => onToggleStep(idx)}
-                    {...stopProp}
-                    className="cursor-pointer w-4 h-4 flex-shrink-0"
-                  />
-                  <input
-                    type="text"
-                    value={step.text}
-                    onChange={(e) => handleStepTextChange(idx, e.target.value)}
-                    onBlur={() => handleStepTextBlur(idx)}
-                    {...stopProp}
-                    className={`flex-1 text-sm bg-transparent border-none focus:outline-none focus:bg-vscode-input-bg px-1 rounded ${
-                      step.completed
-                        ? 'line-through text-vscode-foreground opacity-60'
-                        : 'text-vscode-foreground'
-                    }`}
-                    placeholder="Step description..."
-                  />
-                  <button
-                    onClick={() => handleRemoveStep(idx)}
-                    {...stopProp}
-                    className="opacity-0 group-hover:opacity-100 text-vscode-error hover:text-vscode-error transition-opacity text-sm px-1"
-                    aria-label="Remove step"
-                  >
-                    ×
-                  </button>
+            <DndContext sensors={stepSensors} collisionDetection={closestCenter} onDragEnd={handleStepDragEnd}>
+              <SortableContext items={stepIds} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {localSteps.map((step, idx) => (
+                    <SortableStepRow key={stepIds[idx]} id={stepIds[idx]}>
+                      {(handle) => (
+                        <div className="flex items-center gap-3 p-2 rounded hover:bg-vscode-list-hoverBg transition-colors group">
+                          <span
+                            {...handle}
+                            onPointerDown={(e) => {
+                              // run the sortable listener, then keep the event from reaching outer drag handlers
+                              (handle.onPointerDown as ((ev: React.PointerEvent) => void) | undefined)?.(e);
+                              e.stopPropagation();
+                            }}
+                            aria-label="Drag step"
+                            title="Drag to reorder"
+                            className="cursor-grab active:cursor-grabbing select-none opacity-40 group-hover:opacity-100 text-sm leading-none flex-shrink-0 touch-none"
+                          >
+                            ⠿
+                          </span>
+                          <input
+                            type="checkbox"
+                            checked={step.completed}
+                            onChange={() => onToggleStep(idx)}
+                            {...stopProp}
+                            className="cursor-pointer w-4 h-4 flex-shrink-0"
+                          />
+                          <input
+                            type="text"
+                            value={step.text}
+                            onChange={(e) => handleStepTextChange(idx, e.target.value)}
+                            onBlur={() => handleStepTextBlur(idx)}
+                            {...stopProp}
+                            className={`flex-1 text-sm bg-transparent border-none focus:outline-none focus:bg-vscode-input-bg px-1 rounded ${
+                              step.completed
+                                ? 'line-through text-vscode-foreground opacity-60'
+                                : 'text-vscode-foreground'
+                            }`}
+                            placeholder="Step description..."
+                          />
+                          <button
+                            onClick={() => handleRemoveStep(idx)}
+                            {...stopProp}
+                            className="opacity-0 group-hover:opacity-100 text-vscode-error hover:text-vscode-error transition-opacity text-sm px-1"
+                            aria-label="Remove step"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+                    </SortableStepRow>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
 
             {/* Add Step Button */}
             <button

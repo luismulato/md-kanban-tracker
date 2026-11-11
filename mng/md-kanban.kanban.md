@@ -393,6 +393,31 @@
     Queda duplicada la tarjeta de Backlog "Icono X de eliminar en hover".
     ```
 
+### Reordenar los pasos (DoD) de una tarea con drag and drop
+
+- type: story
+- owner: Claude
+- tags: [feature, steps]
+- priority: normal
+    ```md
+    Pedido de Luis vía la sesión opi-openside-21 (2026-11-11).
+
+    Historia. Como usuario del tablero, quiero ordenar con drag and drop del
+    mouse los pasos (checklist / DoD) de una tarjeta, para reflejar el orden
+    real de trabajo sin borrar y reescribir pasos.
+
+    Criterios de aceptación:
+
+    - En el modal de la tarjeta cada paso tiene un asa de arrastre; al
+    soltarlo en otra posición, la lista queda en el nuevo orden.
+    - El nuevo orden se guarda en el .kanban.md y el parser lo vuelve a leer
+    igual (ida y vuelta).
+    - El estado completado y el texto de cada paso viajan con el paso.
+    - Arrastrar no marca ni desmarca el paso, ni borra, ni cambia el texto.
+    - Parte de la 0.3.8 (commit 3415891); entrega: nueva versión, .vsix,
+    commit e instalación local. Avisar a opi-openside-21.
+    ```
+
 ## Done
 
 ### S2 · Script que extrae de ActivityWatch los bloques activos de un día

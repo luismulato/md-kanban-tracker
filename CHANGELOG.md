@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.9]
+
+- **Reorder the steps (DoD) of a card with drag and drop**: in the card modal every step now has a drag handle (⠿) on its left; drag it to move the step. Text and completed state travel with the step, and the new order is written to the `.kanban.md` in the same `- steps:` list, so the parser reads it back in the same order (round trip covered by a test). Keyboard reordering also works (focus the handle, Space, arrows, Space). Logic in `src/webview/utils/steps.ts` (`moveStep`), acceptance in `docs/features/steps-drag-reorder.feature`.
+- Decisions taken without asking: only the handle starts a drag (checkbox, text and the remove button keep working); a drag needs a 4 px move so a click on the handle does nothing; dropping on itself or outside the list changes nothing; step ids are positional (`step-<n>`) since steps have no ids in the markdown.
+
 ## [0.3.8]
 
 - **Board reloads when the file changes on disk, even if it is not open as text**: until now the panel only refreshed on VS Code's text-document change events, which never fire when the `.kanban.md` is closed as text and an agent, git or another editor rewrites it — the board kept showing stale content (and a later save could overwrite the external edit). A file watcher on `**/*.kanban.md` now reopens the file and reloads the board.
